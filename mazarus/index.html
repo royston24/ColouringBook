@@ -1132,7 +1132,7 @@ function renderToday() {
       </a>
       <div class="vapply"><b>Today:</b> ${esc(vNudge)}</div>
     </div>
-    <div class="mod-f"><a class="small dim verse vsector" href="${youversion(p.vcode)}" target="_blank" rel="noopener">Sector verse: ${esc(p.verse)}</a><button class="btn sm ghost" data-act="journal" data-d="${t}">Reflect in journal</button></div>
+    <div class="mod-f"><span class="small dim">Tap the verse to read it in context</span><button class="btn sm ghost" data-act="journal" data-d="${t}">Reflect in journal</button></div>
     <p class="vcopy">Scripture quotations taken from The Holy Bible, New International Version® NIV®. Copyright © 1973, 1978, 1984, 2011 by Biblica, Inc.™ Used by permission. All rights reserved worldwide.</p>
   </section>`;
 
@@ -1196,7 +1196,7 @@ function renderMap() {
   <section class="mod mission">
     ${modHead(I.target, esc(p.theme), esc(p.goal), `<span class="pill">${Math.round(s.pct * 100)}%</span>`)}
     <div class="mod-b stack" style="gap:10px">
-      <p class="verse">${esc(p.verse)}</p>
+      <a class="verse vsector" href="${youversion(p.vcode)}" target="_blank" rel="noopener" style="font-size:13px">${esc(p.verse)} ${I.ext.replace('<svg', '<svg width="11" height="11"')}</a>
       <p class="small dim">Target income ${kmoney(p.income[0])}–${kmoney(p.income[1])} a month${locked ? " · Preview: you can start missions early" : ""}</p>
       ${wps}
       ${p.note ? `<p class="small dim">${esc(p.note)}</p>` : ""}
