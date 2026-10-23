@@ -1,0 +1,1497 @@
+<title>Mazarus Log</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="theme-color" content="#05070d">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Michroma&family=Sora:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one 480px glass column over a slow nebula field; sticky phase header, fixed bottom tab bar. */
+:root {
+  --void: #05070d;
+  --void-2: #0a0e1a;
+  --glass: rgba(150, 175, 255, 0.055);
+  --glass-hi: rgba(150, 175, 255, 0.10);
+  --edge: rgba(170, 195, 255, 0.13);
+  --edge-hi: rgba(170, 220, 255, 0.32);
+  --ink: #e6ecff;
+  --ink-2: #9ba6c6;
+  --ink-3: #5f6a8a;
+  --ice: #8be9ff;
+  --violet: #a996ff;
+  --rose: #ff8fc7;
+  --good: #6ff0c0;
+  --warn: #ffc773;
+  --bad: #ff7d8f;
+  --grad: linear-gradient(120deg, var(--ice), var(--violet) 55%, var(--rose));
+  --f-display: "Michroma", "Eurostile", "Arial Black", sans-serif;
+  --f-body: "Sora", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --r: 18px;
+  --r-sm: 11px;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { background: var(--void); }
+body {
+  background: var(--void);
+  color: var(--ink);
+  font-family: var(--f-body);
+  font-size: 15px;
+  line-height: 1.5;
+  font-weight: 300;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100%;
+  overflow-x: hidden;
+}
+body::before {
+  content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px);
+  z-index: 30; background: rgba(5, 7, 13, 0.85);
+}
+.nebula { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.nebula i {
+  position: absolute; border-radius: 50%; filter: blur(70px); opacity: .55;
+  animation: drift 28s ease-in-out infinite alternate;
+}
+.nebula i:nth-child(1) { width: 420px; height: 420px; left: -160px; top: -120px; background: radial-gradient(circle, rgba(80,120,255,.55), transparent 70%); }
+.nebula i:nth-child(2) { width: 380px; height: 380px; right: -170px; top: 30%; background: radial-gradient(circle, rgba(170,110,255,.45), transparent 70%); animation-delay: -9s; }
+.nebula i:nth-child(3) { width: 360px; height: 360px; left: 10%; bottom: -200px; background: radial-gradient(circle, rgba(60,220,255,.30), transparent 70%); animation-delay: -17s; }
+.nebula::after {
+  content: ""; position: absolute; inset: 0;
+  background-image: radial-gradient(rgba(255,255,255,.5) 0.6px, transparent 0.7px);
+  background-size: 46px 46px; opacity: .07;
+  mask-image: linear-gradient(to bottom, #000, transparent 80%);
+}
+@keyframes drift { to { transform: translate(40px, 30px) scale(1.08); } }
+@media (prefers-reduced-motion: reduce) { .nebula i { animation: none; } * { transition: none !important; } }
+
+.app {
+  position: relative; z-index: 1; max-width: 480px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 calc(96px + env(safe-area-inset-bottom, 0px));
+}
+
+/* Header */
+.top {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding-block: 14px 12px;
+  background: linear-gradient(to bottom, rgba(5,7,13,.92) 60%, rgba(5,7,13,0));
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+}
+.brand { font-family: var(--f-display); font-size: 12px; letter-spacing: .28em; text-transform: uppercase; }
+.brand b { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; font-weight: 400; }
+.sync { font-family: var(--f-mono); font-size: 10.5px; color: var(--ink-3); display: flex; align-items: center; gap: 6px; letter-spacing: .04em; }
+.sync::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--ink-3); }
+.sync[data-s="saved"]::before { background: var(--good); box-shadow: 0 0 8px var(--good); }
+.sync[data-s="saving"]::before { background: var(--warn); }
+.sync[data-s="local"]::before { background: var(--violet); }
+.sync[data-s="error"]::before { background: var(--bad); }
+
+/* Primitives */
+.stack { display: flex; flex-direction: column; gap: 14px; }
+.glass {
+  position: relative; background: var(--glass); border: 1px solid var(--edge); border-radius: var(--r);
+  backdrop-filter: blur(18px) saturate(140%); -webkit-backdrop-filter: blur(18px) saturate(140%);
+  padding: 16px;
+}
+.glass.hi::before {
+  content: ""; position: absolute; inset: -1px; border-radius: inherit; padding: 1px; pointer-events: none;
+  background: linear-gradient(140deg, rgba(139,233,255,.55), rgba(169,150,255,.15) 40%, transparent 65%, rgba(255,143,199,.35));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+}
+.label { font-family: var(--f-display); font-size: 9.5px; letter-spacing: .22em; text-transform: uppercase; color: var(--ink-2); }
+.h { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+.h .meta { font-family: var(--f-mono); font-size: 11px; color: var(--ink-3); white-space: nowrap; }
+h1, h2, h3 { margin: 0; font-weight: 400; text-wrap: balance; }
+h2 { font-family: var(--f-display); font-size: 17px; letter-spacing: .04em; line-height: 1.35; }
+p { margin: 0; }
+.muted { color: var(--ink-2); }
+.dim { color: var(--ink-3); }
+.small { font-size: 12.5px; }
+.mono { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+.verse { font-style: italic; color: var(--ink-2); font-size: 13px; }
+.row { display: flex; align-items: center; gap: 10px; }
+.between { justify-content: space-between; }
+.wrap { flex-wrap: wrap; }
+.grow { flex: 1; min-width: 0; }
+hr.line { border: 0; height: 1px; background: var(--edge); margin: 4px 0; }
+
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 1.5px solid var(--ice); outline-offset: 2px; border-radius: 6px; }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 42px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--edge-hi);
+  background: var(--glass-hi); font-size: 13.5px; font-weight: 500; letter-spacing: .01em;
+}
+.btn.primary { border: 0; color: #071020; background: var(--grad); }
+.btn.ghost { background: transparent; border-color: var(--edge); color: var(--ink-2); }
+.btn.sm { min-height: 32px; padding: 0 12px; font-size: 12px; }
+.btn:active { transform: scale(.98); }
+.iconbtn { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--edge); background: var(--glass); display: grid; place-items: center; }
+.iconbtn svg { width: 16px; height: 16px; }
+
+input, textarea, select {
+  font: inherit; color: var(--ink); width: 100%;
+  background: rgba(10, 14, 30, .55); border: 1px solid var(--edge); border-radius: var(--r-sm);
+  padding: 10px 12px; font-size: 15px; font-weight: 300;
+}
+textarea { resize: vertical; min-height: 44px; line-height: 1.45; }
+input:focus, textarea:focus, select:focus { outline: none; border-color: var(--edge-hi); background: rgba(14, 20, 42, .7); }
+input::placeholder, textarea::placeholder { color: var(--ink-3); }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field > span { font-size: 12px; color: var(--ink-2); }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.grid2 > * { min-width: 0; }
+.money { position: relative; }
+.money input { padding-left: 24px; font-family: var(--f-mono); }
+.money::before { content: "$"; position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--ink-3); font-family: var(--f-mono); font-size: 14px; }
+
+/* Checkbox rows */
+.checks { display: flex; flex-direction: column; }
+.check {
+  display: grid; grid-template-columns: 22px 1fr; gap: 12px; align-items: start;
+  padding: 10px 0; border-bottom: 1px solid rgba(170,195,255,.06); text-align: left;
+  background: none; border-left: 0; border-right: 0; border-top: 0; width: 100%; font-size: 14px; line-height: 1.45;
+}
+.check:last-child { border-bottom: 0; }
+.check .box {
+  width: 20px; height: 20px; border-radius: 6px; border: 1.5px solid var(--edge-hi); margin-top: 1px;
+  display: grid; place-items: center; transition: background .2s, border-color .2s;
+}
+.check .box svg { width: 12px; height: 12px; opacity: 0; }
+.check[aria-checked="true"] .box { background: var(--grad); border-color: transparent; }
+.check[aria-checked="true"] .box svg { opacity: 1; }
+.check[aria-checked="true"] .txt { color: var(--ink-3); text-decoration: line-through; text-decoration-color: rgba(155,166,198,.4); }
+.check .when { display: block; font-family: var(--f-mono); font-size: 10.5px; color: var(--ink-3); margin-top: 2px; text-decoration: none; }
+
+/* Focus inputs */
+.focus-row { display: grid; grid-template-columns: 22px 1fr; gap: 12px; align-items: center; }
+.focus-row input { background: transparent; border: 0; border-bottom: 1px solid var(--edge); border-radius: 0; padding: 8px 0; }
+.focus-row input:focus { background: transparent; border-bottom-color: var(--ice); }
+.focus-row .check { padding: 0; border: 0; display: block; width: 22px; }
+.focus-row.done input { color: var(--ink-3); text-decoration: line-through; }
+
+/* Chips */
+.chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.chip {
+  min-height: 34px; padding: 0 13px; border-radius: 999px; border: 1px solid var(--edge);
+  background: transparent; color: var(--ink-2); font-size: 12.5px; display: inline-flex; align-items: center; gap: 6px;
+}
+.chip[aria-pressed="true"] { color: #071020; background: var(--grad); border-color: transparent; font-weight: 500; }
+.energy .chip { width: 44px; justify-content: center; font-family: var(--f-mono); padding: 0; }
+.scroller { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; margin-inline: -2px; padding-inline: 2px; }
+.scroller::-webkit-scrollbar { display: none; }
+.scroller .chip { flex: none; }
+.pill { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; font-size: 11px; border: 1px solid var(--edge); color: var(--ink-2); font-family: var(--f-mono); white-space: nowrap; }
+.pill.good { color: var(--good); border-color: rgba(111,240,192,.35); }
+.pill.warn { color: var(--warn); border-color: rgba(255,199,115,.35); }
+.pill.bad { color: var(--bad); border-color: rgba(255,125,143,.35); }
+.pill.ice { color: var(--ice); border-color: rgba(139,233,255,.35); }
+
+/* Hero */
+.hero { padding: 20px 18px 18px; overflow: hidden; }
+.hero .daynum { font-family: var(--f-display); font-size: 40px; line-height: 1; letter-spacing: -.01em; }
+.hero .daynum small { display: block; font-size: 10px; color: var(--ink-3); letter-spacing: .18em; margin-top: 8px; }
+.hero .phase-name { font-family: var(--f-display); font-size: 13px; letter-spacing: .12em; text-transform: uppercase; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.ring { width: 78px; height: 78px; flex: none; }
+.timeline { display: flex; gap: 3px; margin-top: 16px; position: relative; }
+.timeline .seg { height: 6px; border-radius: 3px; background: rgba(170,195,255,.12); position: relative; overflow: hidden; }
+.timeline .seg i { position: absolute; inset: 0 auto 0 0; background: var(--grad); border-radius: 3px; }
+.tl-labels { display: flex; gap: 3px; margin-top: 6px; }
+.tl-labels span { font-family: var(--f-mono); font-size: 9.5px; color: var(--ink-3); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.tl-labels span.on { color: var(--ice); }
+
+.datebar { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.datebar .d { text-align: center; }
+.datebar .d b { display: block; font-weight: 500; font-size: 14px; }
+.datebar .d span { font-family: var(--f-mono); font-size: 10.5px; color: var(--ink-3); letter-spacing: .06em; }
+
+.nudge { display: grid; grid-template-columns: 28px 1fr auto; gap: 12px; align-items: center; padding: 13px 14px; }
+.nudge .ic { width: 28px; height: 28px; border-radius: 9px; display: grid; place-items: center; background: rgba(139,233,255,.1); color: var(--ice); }
+.nudge.warn .ic { background: rgba(255,199,115,.1); color: var(--warn); }
+.nudge.rest .ic { background: rgba(169,150,255,.12); color: var(--violet); }
+.nudge .ic svg { width: 15px; height: 15px; }
+.nudge b { font-weight: 500; font-size: 13.5px; display: block; }
+.nudge p { font-size: 12px; color: var(--ink-2); }
+
+.dots { display: grid; grid-template-columns: repeat(14, 1fr); gap: 5px; }
+.dots i { aspect-ratio: 1; max-width: 100%; border-radius: 50%; background: rgba(170,195,255,.09); border: 1px solid transparent; }
+.dots i.on { background: var(--grad); }
+.dots i.rest { background: transparent; border-color: var(--violet); }
+.dots i.miss { background: transparent; border-color: rgba(255,125,143,.45); }
+.dots i.today { box-shadow: 0 0 0 2px var(--void), 0 0 0 3px var(--ice); }
+
+/* Plan */
+.phase-card .dates { font-family: var(--f-mono); font-size: 11px; color: var(--ink-3); letter-spacing: .04em; }
+.pillars { display: grid; grid-template-columns: 64px 1fr; gap: 6px 12px; font-size: 13px; }
+.pillars dt { font-family: var(--f-display); font-size: 9px; letter-spacing: .18em; text-transform: uppercase; color: var(--ink-3); padding-top: 4px; }
+.pillars dd { margin: 0; color: var(--ink-2); }
+.group-h { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin: 16px 0 2px; }
+.group-h:first-child { margin-top: 0; }
+.group-h b { font-weight: 500; font-size: 13.5px; }
+.group-h.now b { color: var(--ice); }
+.bar { height: 4px; border-radius: 2px; background: rgba(170,195,255,.1); overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--grad); border-radius: 2px; transition: width .4s; }
+.callout { border-left: 2px solid var(--violet); padding: 2px 0 2px 12px; font-size: 13px; color: var(--ink-2); }
+details.fold { border-top: 1px solid var(--edge); }
+details.fold:first-of-type { border-top: 0; }
+details.fold summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center; padding: 12px 0; font-size: 14px; font-weight: 500; }
+details.fold summary::-webkit-details-marker { display: none; }
+details.fold summary::after { content: "+"; font-family: var(--f-mono); color: var(--ink-3); }
+details.fold[open] summary::after { content: "–"; }
+details.fold .inner { padding-bottom: 12px; }
+ol.plain, ul.plain { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; font-size: 13.5px; color: var(--ink-2); }
+.tablewrap { overflow-x: auto; }
+table.t { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+table.t th, table.t td { padding: 8px 6px; text-align: left; border-bottom: 1px solid rgba(170,195,255,.07); white-space: nowrap; }
+table.t th { font-family: var(--f-display); font-weight: 400; font-size: 8.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-3); }
+table.t td.n { font-family: var(--f-mono); text-align: right; }
+table.t tr.on td { color: var(--ice); }
+
+/* Track */
+.tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.tile { padding: 14px; min-width: 0; }
+.tile.wide { grid-column: 1 / -1; }
+.tile .v { font-family: var(--f-mono); font-size: 22px; font-weight: 500; letter-spacing: -.02em; margin-top: 6px; font-variant-numeric: tabular-nums; }
+.tile .s { font-size: 11.5px; color: var(--ink-3); margin-top: 2px; }
+.split { display: flex; flex-direction: column; gap: 8px; }
+.split .ln { display: grid; grid-template-columns: 82px 1fr 74px; gap: 10px; align-items: center; font-size: 13px; }
+.split .ln .bar { height: 6px; border-radius: 3px; }
+.split .ln .amt { font-family: var(--f-mono); text-align: right; font-size: 13px; }
+.split .ln .nm { color: var(--ink-2); }
+.split .ln.give .bar i { background: linear-gradient(90deg, var(--rose), var(--violet)); }
+.split .ln.tax .bar i { background: linear-gradient(90deg, #7f8bb0, #a8b2d6); }
+.split .ln.salary .bar i { background: linear-gradient(90deg, var(--ice), #6fb6ff); }
+.split .ln.debt .bar i { background: linear-gradient(90deg, var(--warn), #ff9f7a); }
+.split .ln.emergency .bar i { background: linear-gradient(90deg, var(--good), var(--ice)); }
+.split .ln.invest .bar i { background: linear-gradient(90deg, var(--violet), #c3b6ff); }
+.stones { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.stone {
+  aspect-ratio: 1; max-width: 100%; border-radius: 16px; border: 1px solid var(--edge); background: transparent;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 4px; text-align: center;
+}
+.stone .n { font-family: var(--f-display); font-size: 15px; color: var(--ink-3); }
+.stone .t { font-size: 9.5px; line-height: 1.2; color: var(--ink-3); }
+.stone.laid { background: radial-gradient(circle at 30% 25%, rgba(139,233,255,.28), rgba(169,150,255,.12) 60%, transparent); border-color: var(--edge-hi); }
+.stone.laid .n { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.stone.laid .t { color: var(--ink-2); }
+.gate { display: grid; grid-template-columns: 26px 1fr auto; gap: 10px; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(170,195,255,.06); }
+.gate:last-child { border-bottom: 0; }
+.gate .g { font-family: var(--f-mono); font-size: 11px; color: var(--ink-3); }
+.gate p { font-size: 13px; color: var(--ink-2); }
+.bars { display: flex; align-items: flex-end; gap: 6px; height: 110px; padding-top: 8px; }
+.bars .b { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 5px; height: 100%; min-width: 0; }
+.bars .b i { width: 100%; max-width: 26px; border-radius: 6px 6px 2px 2px; background: linear-gradient(to top, rgba(139,233,255,.35), var(--violet)); min-height: 2px; }
+.bars .b.now i { background: var(--grad); box-shadow: 0 0 14px rgba(139,233,255,.35); }
+.bars .b span { font-family: var(--f-mono); font-size: 9px; color: var(--ink-3); }
+.list-row { display: grid; grid-template-columns: 1fr auto auto; gap: 10px; align-items: center; padding: 9px 0; border-bottom: 1px solid rgba(170,195,255,.06); font-size: 13px; }
+.list-row:last-child { border-bottom: 0; }
+.x { background: none; border: 0; color: var(--ink-3); width: 28px; height: 28px; border-radius: 50%; }
+
+/* Journal */
+.entry { display: block; width: 100%; text-align: left; background: var(--glass); border: 1px solid var(--edge); border-radius: var(--r); padding: 14px 16px; }
+.entry .ed { display: flex; justify-content: space-between; gap: 10px; font-family: var(--f-mono); font-size: 11px; color: var(--ink-3); margin-bottom: 6px; }
+.entry p { font-size: 13.5px; color: var(--ink-2); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.empty { text-align: center; padding: 28px 18px; color: var(--ink-2); font-size: 13.5px; }
+.empty b { display: block; font-family: var(--f-display); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink); margin-bottom: 6px; font-weight: 400; }
+
+/* Tab bar */
+.tabs {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 25;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 8px calc(10px + env(safe-area-inset-bottom, 0px));
+  background: linear-gradient(to top, rgba(5,7,13,.96) 55%, rgba(5,7,13,0));
+}
+.tabs nav {
+  max-width: 448px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr);
+  background: rgba(16, 22, 44, .62); border: 1px solid var(--edge); border-radius: 22px; padding: 5px;
+  backdrop-filter: blur(22px) saturate(150%); -webkit-backdrop-filter: blur(22px) saturate(150%);
+}
+.tabs button {
+  border: 0; background: transparent; border-radius: 17px; min-height: 52px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  color: var(--ink-3); font-family: var(--f-display); font-size: 8.5px; letter-spacing: .16em; text-transform: uppercase;
+}
+.tabs button svg { width: 19px; height: 19px; }
+.tabs button[aria-current="page"] { color: var(--ink); background: rgba(139,233,255,.09); }
+.tabs button[aria-current="page"] svg { color: var(--ice); filter: drop-shadow(0 0 6px rgba(139,233,255,.6)); }
+
+.sheet-bg { position: fixed; inset: 0; z-index: 40; background: rgba(2,3,8,.6); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); display: flex; align-items: flex-end; justify-content: center; }
+.sheet {
+  width: 100%; max-width: 480px; max-height: 88vh; overflow-y: auto;
+  background: linear-gradient(to bottom, rgba(22,28,54,.96), rgba(10,14,28,.98));
+  border: 1px solid var(--edge); border-bottom: 0; border-radius: 24px 24px 0 0;
+  padding-left: max(18px, env(safe-area-inset-left, 0px));
+  padding-right: max(18px, env(safe-area-inset-right, 0px));
+  padding-block: 18px calc(22px + env(safe-area-inset-bottom, 0px));
+}
+.toast {
+  position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(92px + env(safe-area-inset-bottom, 0px)); z-index: 50;
+  background: rgba(20,28,56,.94); border: 1px solid var(--edge-hi); border-radius: 999px; padding: 9px 16px; font-size: 13px;
+  max-width: calc(100% - 32px);
+}
+.screen { animation: rise .35s ease both; }
+@keyframes rise { from { transform: translateY(6px); } to { transform: none; } }
+.splash { padding: 60px 0; text-align: center; color: var(--ink-3); font-family: var(--f-mono); font-size: 12px; }
+</style>
+
+<div class="nebula" aria-hidden="true"><i></i><i></i><i></i></div>
+<div class="app">
+  <header class="top">
+    <div class="brand">Project <b>Mazarus</b></div>
+    <div class="sync" id="sync" data-s="idle">Loading</div>
+  </header>
+  <main id="main"><div class="splash">Loading your plan…</div></main>
+</div>
+<div class="tabs">
+  <nav id="tabs" aria-label="Sections">
+    <button data-tab="today" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/></svg>Today</button>
+    <button data-tab="plan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 5h16M4 12h10M4 19h6"/><circle cx="18" cy="12" r="2"/><circle cx="14" cy="19" r="2"/></svg>Plan</button>
+    <button data-tab="journal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 3h11a2 2 0 0 1 2 2v16l-3-2-3 2-3-2-3 2V4a1 1 0 0 1 1-1Z"/><path d="M9 8h6M9 12h6"/></svg>Journal</button>
+    <button data-tab="track"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Track</button>
+  </nav>
+</div>
+
+<script>
+/* ============================================================
+   PLAN DATA — Project Mazarus: 18-Month Plan (Nov 2026 – Apr 2028)
+   ============================================================ */
+const PLAN_START = "2026-11-01";
+const PLAN_END = "2028-04-30";
+
+const PHASES = [
+  {
+    n: 0, name: "Foundation", theme: "See clearly", start: "2026-11-01", end: "2026-11-30",
+    verse: "“Be diligent to know the state of your flocks.” Prov 27:23",
+    goal: "The whole picture on one page, a money system set up, and giving restarted.",
+    income: [3000, 4000],
+    groups: [
+      { label: "Week 1 — See it", from: "2026-11-01", to: "2026-11-07", items: [
+        "Write your “why” in 5 sentences (faith, family, freedom, giving) and sign the pause list",
+        "Debt inventory page: creditor, balance, rate, minimum, due date, late or current, informal loans, IRAS/CPF arrears; totals calculated",
+        "Day Zero journal entry: income, debt, savings, feelings, no fixing yet (Ebenezer stone #1)",
+        "Shermine and SPCA quotes sent in good/better/best tiers"
+      ]},
+      { label: "Week 2 — Share it", from: "2026-11-08", to: "2026-11-14", items: [
+        "Credit Bureau Singapore report pulled and matched to your list",
+        "Whole picture shared with your wife; monthly money date booked; giving % agreed together",
+        "Pipeline triage sheet (next action, date, value, probability); ACMI terms chased",
+        "“My Numbers” one-pager: last 3 months of spending in 6 lines → monthly essentials (E)"
+      ]},
+      { label: "Week 3 — Set it up", from: "2026-11-15", to: "2026-11-21", items: [
+        "Business account and four personal pots opened: Essentials, Tax, Giving, Emergency",
+        "One-page standard terms: 50% deposit; 100% upfront under $1.5k; retainers invoiced on the 1st, net-14",
+        "GIRO for every debt minimum; cards frozen; saved cards removed from online stores",
+        "Giving restarted at 5% of the next receipt"
+      ]},
+      { label: "Week 4 — Run it", from: "2026-11-22", to: "2026-11-30", items: [
+        "First weekly 30-minute review and first money date held; five-number dashboard built",
+        "Five relationship-first outreach notes sent (then every week after)",
+        "Accountability partner asked",
+        "$500 in Emergency → no-spend celebration"
+      ]}
+    ],
+    milestones: [
+      "Full picture on one page, shared with your wife",
+      "$500 saved and 5% giving restarted",
+      "$3–4k collected from deposits and smaller quotes"
+    ],
+    challenge: "Shame and avoidance when the real numbers appear. Treat it as inventory, not judgement. Share each number with your partner before judging it. If any debt is late or minimums are unaffordable, book a free chat with Credit Counselling Singapore now.",
+    exit: ["Inventory complete (unknown rates being chased)", "Accounts live", "Giving restarted", "$500 saved", "Dashboard running"],
+    note: "Rolls into 1 Dec: first fixed salary paid; first calls to creditors asking for a lower rate."
+  },
+  {
+    n: 1, name: "Stabilise", theme: "Faithful in little", start: "2026-12-01", end: "2027-03-31",
+    verse: "“Whoever is faithful in very little is also faithful in much.” Luke 16:10",
+    goal: "Income averaging $3.5–5k, the salary system running like clockwork, and one month of safety.",
+    income: [3500, 5000],
+    pillars: {
+      Earn: "ACMI retainer live from Jan; one more retainer or project in negotiation.",
+      Plan: "Every receipt swept the same day; Emergency reaches 1 month of essentials.",
+      Debt: "Minimums on autopilot; 90 days of no new debt; Debt #1 named.",
+      Invest: "Learning Module 1 only; sign IPS v0.",
+      Steward: "Weekly journal; rest day protected."
+    },
+    groups: [
+      { label: "December", from: "2026-12-01", to: "2026-12-31", items: [
+        "First same-day sweep (Tax + Giving) after a client payment",
+        "Accountant session booked (HC and Jasero structure, IRAS, MediSave); agree with Jasero partners how fees reach you",
+        "Hyper Bureau terms with Justin in writing before ACMI starts",
+        "Applied AI offer packaged on one page, offered to two warm contacts",
+        "One-page post-mortem on your past investing loss (no shame, one lesson)"
+      ]},
+      { label: "January", from: "2027-01-01", to: "2027-01-31", items: [
+        "ACMI first invoice issued in advance on 1 Jan; “produce a month ahead” workflow running",
+        "Emergency reaches $1,000",
+        "Debt #1 named; its payoff figure on the fridge",
+        "90 days of no new debt"
+      ]},
+      { label: "February", from: "2027-02-01", to: "2027-02-28", items: [
+        "SPCA and Shermine decisions chased; 10 outreach conversations, 3 proposals out",
+        "One chat with a MAS-licensed adviser about insurance for 3 dependants; no purchase yet",
+        "IPS v0 signed: “No real investing until Gates 1–3 are green.”"
+      ]},
+      { label: "March", from: "2027-03-01", to: "2027-03-31", items: [
+        "Business account holds 1 month of salary",
+        "Three on-time monthly reviews in a row",
+        "First quarterly retreat (half-day)"
+      ]}
+    ],
+    milestones: ["ACMI billing (Jan)", "Emergency at 1 month of essentials (Mar)", "Three consecutive reviews and 90 days with no new borrowing"],
+    challenge: "Lumpy income and late deposits. No work starts before the deposit. Every Monday, check “money in the next 30 days”. Pay minimums from the Hub buffer. Plan on your lowest realistic month; anything above is extra.",
+    exit: ["Emergency at 1 month", "Hub at 1 month of salary", "Three monthly reviews done", "Income average ≥ $3.5k", "No late payments for 90 days"]
+  },
+  {
+    n: 2, name: "Build", theme: "Diligent hands", start: "2027-04-01", end: "2027-09-30",
+    verse: "“In all toil there is profit.” Prov 14:23",
+    goal: "Income from ~$5k to $7–8k, first debt cleared, three months of safety.",
+    income: [5000, 8000],
+    pillars: {
+      Earn: "3–4 retainers; Applied AI becomes Engine B.",
+      Plan: "Emergency to 3 months; salary raised in small steps; tax pot reconciled.",
+      Debt: "First debt cleared, then highest-rate first; 25% cleared.",
+      Invest: "Modules 2–3; $10k paper portfolio.",
+      Steward: "Giving steps up to 7%; burnout guard."
+    },
+    groups: [
+      { label: "April", from: "2027-04-01", to: "2027-04-30", items: ["First paid Applied AI workshop delivered", "First debt paid off (Debt #1)", "Giving moves to 7%"] },
+      { label: "May", from: "2027-05-01", to: "2027-05-31", items: [
+        "Freed minimum rolled onto the next debt; ask creditors again for a lower rate",
+        "Two protected outreach mornings a week locked in the calendar",
+        "Second retainer signed; annual-prepay option (~10% off) offered after month 3"
+      ]},
+      { label: "June", from: "2027-06-01", to: "2027-06-30", items: [
+        "New-client prices raised 15–20%; deliverables productised",
+        "Paper portfolio started; T-bill vs savings yields logged",
+        "Recurring revenue alone covers essentials"
+      ]},
+      { label: "July", from: "2027-07-01", to: "2027-07-31", items: [
+        "First month with no gap week; first $7k month if the pipeline allows",
+        "First week with no work after 6:30pm",
+        "25% of total debt cleared"
+      ]},
+      { label: "August", from: "2027-08-01", to: "2027-08-31", items: [
+        "IRAS Notice of Assessment checked against the tax pot",
+        "FLIGHT build slot opens: 4 hrs/week, only if Phase 2 is on track"
+      ]},
+      { label: "September", from: "2027-09-01", to: "2027-09-30", items: [
+        "Emergency at 3 months",
+        "Quarterly retreat: revisit the pause list and household “enough” figure with your wife"
+      ]}
+    ],
+    milestones: ["Recurring revenue covers essentials (Jun)", "First debt gone and 25% cleared (Jul)", "Emergency at 3 months and two months at $7k+ (Sep)"],
+    challenge: "Delivery eats selling time; 40+ hour weeks tempt burnout. Keep the protected outreach mornings, productise, use AI-assisted first drafts, set a hard stop time, score energy weekly. Energy ≤ 2 for two weeks → cut a venture, not sleep.",
+    exit: ["2 consecutive months at $6.5k+", "≥ 60% recurring", "Emergency at 3 months", "First debt cleared and 25% cleared", "No client above 30% of revenue"]
+  },
+  {
+    n: 3, name: "Grow", theme: "Enough, and more to share", start: "2027-10-01", end: "2028-01-31",
+    verse: "“I have learned, in whatever state I am, to be content.” Phil 4:11",
+    goal: "A 3-month average of $8k+, giving at 10%, half the debt gone, and a first tiny investment.",
+    income: [8000, 10000],
+    pillars: {
+      Earn: "$8–10k/month; FLIGHT core launched once to your list.",
+      Plan: "Salary raised to the “enough” figure; Emergency 3.5+ months; Invest pot opened.",
+      Debt: "50% cleared by Dec; every debt above ~8% gone or on a funded path.",
+      Invest: "Modules 4–6; IPS v1; first real money only if Gates 1–3 are green.",
+      Steward: "Giving at 10%; one-year anniversary entry."
+    },
+    groups: [
+      { label: "October", from: "2027-10-01", to: "2027-10-31", items: ["Giving at 10%; family “enough” conversation held", "First $8k month (stretch)", "IPS v1 written as one visual page"] },
+      { label: "November", from: "2027-11-01", to: "2027-11-30", items: [
+        "FLIGHT launched to your list and past clients ($97–297); Brand Clarity Scorecard live",
+        "Paper portfolio survives a market wobble untouched",
+        "One-year anniversary entry (“One year: what God did”) and quarterly retreat"
+      ]},
+      { label: "December", from: "2027-12-01", to: "2027-12-31", items: [
+        "One planned gift beyond the tithe",
+        "50% of total debt cleared",
+        "IPS v1 reviewed with a MAS-licensed adviser"
+      ]},
+      { label: "January", from: "2028-01-01", to: "2028-01-31", items: [
+        "First real investment: $50–100 monthly auto-debit into one broad index fund (if Gates 1–3 green)",
+        "Highest-rate debt gone; first $10k month (stretch)",
+        "3 months at an average of $8k+"
+      ]}
+    ],
+    milestones: ["3-month average ≥ $8k (Jan)", "50% of debt cleared, none above 8% left unfunded", "Giving at 10%, IPS v1 signed, first automatic investment running"],
+    challenge: "Lifestyle creep in good months; fear or “win it back” urges. Salary only changes at the quarterly retreat (max +10%). Feast-month rule. 7-day cooling-off and partner veto on any off-plan move. Re-read your Day Zero entry.",
+    exit: ["3-month average ≥ $8k", "Emergency at 3.5+ months", "50% of debt cleared", "Gates 1–3 green", "Giving at 10%", "No month missed on the dashboard or review"]
+  },
+  {
+    n: 4, name: "Multiply", theme: "Enriched to give", start: "2028-02-01", end: "2028-04-30",
+    verse: "“You will be enriched in every way to be generous.” 2 Cor 9:11",
+    goal: "$9–12k a month that survives losing any one client, 75% of debt gone, and the story written.",
+    income: [9000, 12000],
+    pillars: {
+      Earn: "$9–12k/month; 60%+ recurring.",
+      Plan: "Emergency 4+ months, heading to 6; framework rebalanced for the next 18 months.",
+      Debt: "75% cleared by Mar; final path dated.",
+      Invest: "Compare paper vs real; raise the monthly amount only if gates hold.",
+      Steward: "Planned gift; testimony compiled."
+    },
+    groups: [
+      { label: "February", from: "2028-02-01", to: "2028-02-29", items: [
+        "Evaluate one paused app with real user data: revive only if it can earn within 90 days",
+        "Raise retainer ceilings; 1–2 workshops a month; Designed for Good hours capped"
+      ]},
+      { label: "March", from: "2028-03-01", to: "2028-03-31", items: [
+        "75% of debt cleared; informal debts settled first",
+        "Annual tax review with the accountant (SRS and voluntary CPF questions)",
+        "Quarterly retreat: next 18-month plan drafted, new stop list decided"
+      ]},
+      { label: "April", from: "2028-04-01", to: "2028-04-30", items: [
+        "Write the “Mazarus story”: 3 wins, 3 struggles, 3 lessons; share with your wife, partner and pastor",
+        "Choose which rhythms to keep for life; celebrate with a no-spend family day"
+      ]}
+    ],
+    milestones: ["$9k+ for 3 months, 60%+ recurring", "75%+ of debt cleared with a dated finish line", "Testimony compiled and one gift beyond the tithe given"],
+    challenge: "Pride, performance, or the urge to expand. Share struggles as well as wins. Give before publishing. No balances or client details in public. Any new venture must pass the 90-day earning test.",
+    exit: ["All gates reviewed", "Next 18-month plan written", "Testimony shared with at least one trusted person"]
+  }
+];
+
+const NON_NEGOTIABLES = [
+  "Give first, from every receipt, as a percentage. Never borrow to give. Never “catch up” with guilt.",
+  "Family essentials come before debt acceleration and investing (1 Tim 5:8).",
+  "Tax money is not your money. Set it aside the day a payment lands.",
+  "No new consumer debt. No borrowing to invest.",
+  "Fixed salary. All income lands in one business account; you live on a steady monthly draw.",
+  "Small wins. Every goal breaks into steps of days to two weeks.",
+  "Rest is built in. One full day off a week. Cut a venture before cutting sleep.",
+  "Your wife is in the loop. Monthly money date, shared numbers, no secrecy.",
+  "Professionals for the big calls. Tax, CPF/SRS, insurance and investments.",
+  "Miss once, resume; never miss twice. A bad week is information, not a verdict (Lam 3:22–23)."
+];
+const PAUSE_LIST = ["FaithTales", "Doodlebot", "Speapy", "Fraudar", "New MOE / makerspace bids", "New FLIGHT features", "Upwork profile building"];
+
+// % of each receipt by phase. P0 emergency = "first $500", P0 salary = "rest".
+const ALLOC = [
+  { give: 5,  tax: 12, salary: null, debt: 0,  emergency: null, invest: 0 },
+  { give: 5,  tax: 12, salary: 63,   debt: 5,  emergency: 15,   invest: 0 },
+  { give: 7,  tax: 15, salary: 50,   debt: 15, emergency: 13,   invest: 0 },
+  { give: 10, tax: 15, salary: 45,   debt: 18, emergency: 7,    invest: 5 },
+  { give: 10, tax: 15, salary: 42,   debt: 15, emergency: 8,    invest: 10 }
+];
+const BUCKETS = [
+  ["give", "Give"], ["tax", "Tax"], ["salary", "Salary"], ["debt", "Debt extra"], ["emergency", "Emergency"], ["invest", "Invest"]
+];
+const STREAMS = ["Engine A · Hyper", "Engine B · Applied AI", "FLIGHT", "Studio Jasero", "Other"];
+
+const DEBT_MARKERS = [
+  { date: "2026-11-30", pct: 0, label: "Inventory with rates; credit report" },
+  { date: "2027-01-31", pct: 0, label: "Debt #1 named; 90 days no new debt" },
+  { date: "2027-05-31", pct: 0, label: "First debt cleared" },
+  { date: "2027-07-31", pct: 25, label: "25% cleared" },
+  { date: "2027-12-31", pct: 50, label: "50% cleared; highest-rate debt gone" },
+  { date: "2028-03-31", pct: 75, label: "75% cleared" }
+];
+// Emergency targets: [from date, months of E or fixed $]
+const EMERGENCY_TARGETS = [
+  { from: "2026-01-01", fixed: 500, label: "$500" },
+  { from: "2027-01-01", fixed: 1000, label: "$1,000" },
+  { from: "2027-03-01", e: 1, label: "1 month" },
+  { from: "2027-09-01", e: 3, label: "3 months" },
+  { from: "2028-01-01", e: 3.5, label: "3.5 months" },
+  { from: "2028-04-01", e: 4, label: "4+ months" }
+];
+const MODULES = [
+  ["Dec 2026", "Post-mortem of the past loss", "One page; the lesson in one line"],
+  ["Dec – Feb", "1: Risk, return, compounding, behaviour", "Explain compounding to the kids in 3 minutes; IPS v0"],
+  ["Apr – Jun", "2: Singapore ladder (savings, T-bills, SSB, FDs)", "Yield comparison logged"],
+  ["Jun – Aug", "3: Funds, ETFs, REITs, fees · 4: CPF and SRS", "$10k paper portfolio"],
+  ["Sep – Oct", "5: Dollar-cost averaging, rebalancing, fees", "IPS v1 with a 7-day cooling-off rule"],
+  ["Nov – Jan", "6: MAS-licensed adviser review; values-screened funds", "Adviser feedback on IPS v1"],
+  ["Feb – Apr 2028", "Review: paper vs real", "Testimony chapter “From losing to learning”"]
+];
+const STONES = [
+  ["Day Zero", "Nov 2026"], ["Giving restarted", "Nov 2026"], ["First month tracked; $500 saved", "Nov–Dec 2026"],
+  ["ACMI retainer billing", "Jan 2027"], ["1 month of safety", "Mar 2027"], ["First debt gone", "Apr–May 2027"],
+  ["3 months of safety", "Sep 2027"], ["Giving at 10%; one-year anniversary", "Oct–Nov 2027"], ["50% of debt cleared", "Dec 2027"],
+  ["First tiny investment, left alone", "Jan 2028"], ["Three months at $8k+ average", "Jan 2028"], ["The 18-month testimony", "Apr 2028"]
+];
+const RETREAT_MONTHS = ["2027-03", "2027-09", "2027-11", "2028-03"];
+
+/* ============================================================
+   DATE HELPERS (local time)
+   ============================================================ */
+const pad = n => String(n).padStart(2, "0");
+const iso = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const parse = s => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
+const addDays = (s, n) => { const d = parse(s); d.setDate(d.getDate() + n); return iso(d); };
+const diffDays = (a, b) => Math.round((parse(b) - parse(a)) / 864e5);
+const todayISO = () => iso(new Date());
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const DOW = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const fmtDay = s => { const d = parse(s); return `${DOW[d.getDay()]} ${d.getDate()} ${MONTHS[d.getMonth()]}`; };
+const fmtMonth = ym => { const [y, m] = ym.split("-").map(Number); return `${MONTHS[m - 1]} ${y}`; };
+const monthOf = s => s.slice(0, 7);
+const addMonths = (ym, n) => { const [y, m] = ym.split("-").map(Number); const d = new Date(y, m - 1 + n, 1); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}`; };
+const weekKey = s => { const d = parse(s); return addDays(s, (7 - d.getDay()) % 7); }; // the Sunday that closes this week
+const TOTAL_DAYS = diffDays(PLAN_START, PLAN_END) + 1;
+
+function phaseFor(s) {
+  if (s < PLAN_START) return PHASES[0];
+  return PHASES.find(p => s >= p.start && s <= p.end) || PHASES[PHASES.length - 1];
+}
+function groupFor(p, s) {
+  return p.groups.findIndex(g => s >= g.from && s <= g.to);
+}
+const itemId = (p, g, i) => `p${p}g${g}i${i}`;
+
+/* ============================================================
+   STORE — db capability (private per person) with device fallback
+   ============================================================ */
+const S = {
+  state: { settings: {}, checks: {}, receipts: [], snaps: [], stones: {}, gates: {}, modules: {} },
+  days: {},
+  reviews: {},
+  backend: null,
+  base: null,
+  pending: {},
+  ready: false
+};
+const blankState = () => ({ settings: {}, checks: {}, receipts: [], snaps: [], stones: {}, gates: {}, modules: {} });
+
+const LocalBackend = {
+  kind: "local",
+  key: p => "mazarus:" + p,
+  async set(path, data) { try { localStorage.setItem(this.key(path), JSON.stringify(data)); } catch (e) { throw { code: "unavailable" }; } },
+  async remove(path) { try { localStorage.removeItem(this.key(path)); } catch (e) {} },
+  async loadAll(base) {
+    const out = { state: null, days: {}, reviews: {} };
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (!k || !k.startsWith("mazarus:" + base)) continue;
+        const rest = k.slice(("mazarus:" + base).length);
+        const v = JSON.parse(localStorage.getItem(k));
+        if (rest === "") out.state = v;
+        else if (rest.startsWith("/days/")) out.days[rest.slice(6)] = v;
+        else if (rest.startsWith("/reviews/")) out.reviews[rest.slice(9)] = v;
+      }
+    } catch (e) {}
+    return out;
+  }
+};
+
+function DbBackend(db) {
+  return {
+    kind: "db",
+    async set(path, data) { await db.doc(path).set(data); },
+    async remove(path) { await db.doc(path).delete(); },
+    async loadAll(base) {
+      const ref = db.doc(base);
+      const [st, days, revs] = await Promise.all([
+        ref.get(), ref.collection("days").limit(1000).get(), ref.collection("reviews").limit(1000).get()
+      ]);
+      const out = { state: st.exists ? st.data() : null, days: {}, reviews: {} };
+      days.docs.forEach(d => { out.days[d.id] = d.data(); });
+      revs.docs.forEach(d => { out.reviews[d.id] = d.data(); });
+      return out;
+    },
+    watch(base, onChange) {
+      const ref = db.doc(base);
+      const guard = path => S.pending[path];
+      ref.onSnapshot(snap => {
+        if (snap.metadata.hasPendingWrites || guard(base) || !snap.exists) return;
+        S.state = Object.assign(blankState(), clone(snap.data())); onChange();
+      }, () => {});
+      ref.collection("days").limit(1000).onSnapshot(q => {
+        if (q.metadata.hasPendingWrites) return;
+        let changed = false;
+        q.docChanges().forEach(c => {
+          const p = base + "/days/" + c.doc.id;
+          if (guard(p)) return;
+          if (c.type === "removed") delete S.days[c.doc.id]; else S.days[c.doc.id] = clone(c.doc.data());
+          changed = true;
+        });
+        if (changed) onChange();
+      }, () => {});
+      ref.collection("reviews").limit(1000).onSnapshot(q => {
+        if (q.metadata.hasPendingWrites) return;
+        let changed = false;
+        q.docChanges().forEach(c => {
+          const p = base + "/reviews/" + c.doc.id;
+          if (guard(p)) return;
+          if (c.type === "removed") delete S.reviews[c.doc.id]; else S.reviews[c.doc.id] = clone(c.doc.data());
+          changed = true;
+        });
+        if (changed) onChange();
+      }, () => {});
+    }
+  };
+}
+
+const clone = o => JSON.parse(JSON.stringify(o || {}));
+
+function setSync(s, text) {
+  const el = document.getElementById("sync");
+  el.dataset.s = s; el.textContent = text;
+}
+function syncIdle() {
+  if (Object.keys(S.pending).length) return;
+  if (S.backend.kind === "db") setSync("saved", "Saved");
+  else setSync("local", "On this device");
+}
+
+function queueSave(path, getData, delay = 700) {
+  const e = S.pending[path] || (S.pending[path] = { v: 0 });
+  e.get = getData; e.v++;
+  clearTimeout(e.timer);
+  setSync("saving", "Saving");
+  e.timer = setTimeout(() => flush(path), delay);
+}
+async function flush(path) {
+  const e = S.pending[path];
+  if (!e) return;
+  if (e.inflight) { e.again = true; return; }
+  e.inflight = true;
+  const v = e.v;
+  let ok = true;
+  try { await S.backend.set(path, clone(e.get())); }
+  catch (err) {
+    ok = false;
+    if (err && err.code === "unavailable") {
+      await new Promise(r => setTimeout(r, 800 + Math.random() * 800));
+      try { await S.backend.set(path, clone(e.get())); ok = true; } catch (_) {}
+    }
+    if (!ok) setSync("error", err && err.code === "quota_exceeded" ? "Storage full" : "Not saved");
+  }
+  e.inflight = false;
+  if (e.again || e.v !== v) { e.again = false; return flush(path); }
+  if (ok) { delete S.pending[path]; syncIdle(); }
+}
+const statePath = () => S.base;
+const dayPath = d => S.base + "/days/" + d;
+const reviewPath = k => S.base + "/reviews/" + k;
+const saveState = (delay) => queueSave(statePath(), () => S.state, delay);
+const saveDay = d => queueSave(dayPath(d), () => S.days[d] || {});
+const saveReview = k => queueSave(reviewPath(k), () => S.reviews[k] || {});
+
+async function boot() {
+  let db = null, uid = null;
+  if (window.claude && typeof window.claude.use === "function") {
+    try {
+      const [dbNs, userNs] = await Promise.all([window.claude.use("db"), window.claude.use("user")]);
+      if (dbNs && userNs) { uid = await userNs.id(); if (uid) db = dbNs; }
+    } catch (e) { db = null; }
+  }
+  if (db) { S.backend = DbBackend(db); S.base = `data/users/${uid}/state`; }
+  else { S.backend = LocalBackend; S.base = "local/state"; }
+  let loaded;
+  try { loaded = await S.backend.loadAll(S.base); }
+  catch (e) { S.backend = LocalBackend; S.base = "local/state"; loaded = await LocalBackend.loadAll(S.base); }
+  S.state = Object.assign(blankState(), loaded.state || {});
+  S.days = loaded.days; S.reviews = loaded.reviews;
+  S.ready = true;
+  syncIdle();
+  if (S.backend.watch) S.backend.watch(S.base, softRender);
+  render();
+}
+
+/* ============================================================
+   UI STATE + HELPERS
+   ============================================================ */
+const UI = {
+  tab: "today",
+  date: todayISO(),
+  planPhase: phaseFor(todayISO()).n,
+  jTab: "daily",
+  week: weekKey(todayISO()),
+  month: monthOf(todayISO()) < "2026-11" ? "2026-11" : monthOf(todayISO())
+};
+try { const t = localStorage.getItem("mazarus:ui:tab"); if (t) UI.tab = t; } catch (e) {}
+const VALID_TABS = ["today", "plan", "journal", "track"];
+if (VALID_TABS.includes(location.hash.slice(1))) UI.tab = location.hash.slice(1);
+
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const money = (n, dp = 0) => (n < 0 ? "−$" : "$") + Math.abs(Math.round(n * 10 ** dp) / 10 ** dp).toLocaleString("en-SG", { minimumFractionDigits: dp, maximumFractionDigits: dp });
+const kmoney = n => Math.abs(n) >= 1000 ? (n < 0 ? "−$" : "$") + (Math.abs(n) / 1000).toFixed(Math.abs(n) >= 10000 ? 0 : 1) + "k" : money(n);
+const num = v => { const n = parseFloat(String(v).replace(/[^0-9.\-]/g, "")); return isFinite(n) ? n : 0; };
+const ICON = {
+  check: '<svg viewBox="0 0 12 12" fill="none" stroke="#071020" stroke-width="2"><path d="M2.5 6.2 5 8.5l4.5-5"/></svg>',
+  left: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m15 5-7 7 7 7"/></svg>',
+  right: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m9 5 7 7-7 7"/></svg>',
+  cal: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
+  heart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10Z"/></svg>',
+  moon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></svg>',
+  alert: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 8v5M12 16.5v.5"/><circle cx="12" cy="12" r="9"/></svg>',
+  star: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m12 3 2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.5 6.7 19.4l1.2-6L3.4 9.3l6-.7Z"/></svg>'
+};
+const checkBtn = (id, label, on, extra = "") =>
+  `<button class="check" role="checkbox" aria-checked="${on ? "true" : "false"}" data-act="toggle" data-id="${esc(id)}"><span class="box">${ICON.check}</span><span class="txt">${esc(label)}${extra}</span></button>`;
+
+function toast(msg) {
+  const t = document.createElement("div");
+  t.className = "toast"; t.textContent = msg; t.setAttribute("role", "status");
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2200);
+}
+
+function latestSnap() { const s = S.state.snaps; return s.length ? s[s.length - 1] : null; }
+const E = () => num(S.state.settings.essentials);
+function emergencyTarget(s) {
+  let t = EMERGENCY_TARGETS[0];
+  for (const x of EMERGENCY_TARGETS) if (s >= x.from) t = x;
+  const amount = t.fixed != null ? t.fixed : (E() ? t.e * E() : null);
+  return { ...t, amount };
+}
+function nextDebtMarker(s) { return DEBT_MARKERS.find(m => m.pct > 0 && m.date >= s) || DEBT_MARKERS[DEBT_MARKERS.length - 1]; }
+function incomeByMonth() {
+  const m = {};
+  S.state.receipts.forEach(r => { const k = monthOf(r.date); m[k] = (m[k] || 0) + num(r.amount); });
+  return m;
+}
+function avg3(ym) {
+  const m = incomeByMonth();
+  let sum = 0; for (let i = 1; i <= 3; i++) sum += m[addMonths(ym, -i)] || 0;
+  return sum / 3;
+}
+function gates() {
+  const snap = latestSnap();
+  const e = E();
+  const g1 = !!(snap && e && num(snap.emergency) >= e);
+  return { g1, g2: !!S.state.gates.g2, g3: !!S.state.gates.g3 };
+}
+function allocate(amount, dateS) {
+  const p = phaseFor(dateS);
+  const a = ALLOC[p.n];
+  const out = {};
+  out.give = amount * a.give / 100;
+  out.tax = amount * a.tax / 100;
+  out.debt = amount * a.debt / 100;
+  const g = gates();
+  const investOk = g.g1 && g.g2 && g.g3;
+  let investNote = "";
+  if (a.invest) {
+    if (investOk) out.invest = amount * a.invest / 100;
+    else { out.invest = 0; out.debt += amount * a.invest / 100; investNote = `Invest ${a.invest}% goes to Debt until Gates 1–3 are green.`; }
+  } else out.invest = 0;
+  if (p.n === 0) {
+    const ls = latestSnap() || {};
+    const have = num(ls.emergency) + S.state.receipts.filter(r => !ls.date || r.date > ls.date).reduce((s, r) => s + num((r.alloc || {}).emergency), 0);
+    const need = Math.max(0, 500 - have);
+    const rest = amount - out.give - out.tax;
+    out.emergency = Math.min(need, Math.max(0, rest));
+    out.salary = rest - out.emergency;
+  } else {
+    out.emergency = amount * a.emergency / 100;
+    out.salary = amount * a.salary / 100;
+  }
+  return { out, phase: p, note: investNote };
+}
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+const main = () => document.getElementById("main");
+let deferredRender = false;
+function softRender() {
+  const a = document.activeElement;
+  if (a && main().contains(a) && /INPUT|TEXTAREA|SELECT/.test(a.tagName)) { deferredRender = true; return; }
+  render();
+}
+document.addEventListener("focusout", () => { if (deferredRender) setTimeout(() => { const a = document.activeElement; if (!(a && /INPUT|TEXTAREA|SELECT/.test(a.tagName))) { deferredRender = false; render(); } }, 50); });
+
+function render() {
+  if (!S.ready) return;
+  document.querySelectorAll("#tabs button").forEach(b => b.setAttribute("aria-current", b.dataset.tab === UI.tab ? "page" : "false"));
+  const html = { today: renderToday, plan: renderPlan, journal: renderJournal, track: renderTrack }[UI.tab]();
+  const m = main();
+  m.innerHTML = `<div class="screen stack">${html}</div>`;
+}
+
+/* ---------- TODAY ---------- */
+function ring(pct) {
+  const r = 32, c = 2 * Math.PI * r, off = c * (1 - Math.max(0, Math.min(1, pct)));
+  return `<svg class="ring" viewBox="0 0 78 78" aria-hidden="true">
+    <defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8be9ff"/><stop offset=".6" stop-color="#a996ff"/><stop offset="1" stop-color="#ff8fc7"/></linearGradient></defs>
+    <circle cx="39" cy="39" r="${r}" fill="none" stroke="rgba(170,195,255,.12)" stroke-width="4"/>
+    <circle cx="39" cy="39" r="${r}" fill="none" stroke="url(#rg)" stroke-width="4" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${off}" transform="rotate(-90 39 39)"/>
+    <text x="39" y="43" text-anchor="middle" fill="#e6ecff" font-family="JetBrains Mono, monospace" font-size="13">${Math.round(pct * 100)}%</text>
+  </svg>`;
+}
+function phaseProgress(p) {
+  let total = 0, done = 0;
+  p.groups.forEach((g, gi) => g.items.forEach((_, ii) => { total++; if (S.state.checks[itemId(p.n, gi, ii)]) done++; }));
+  p.milestones.forEach((_, i) => { total++; if (S.state.checks[`p${p.n}m${i}`]) done++; });
+  return { total, done, pct: total ? done / total : 0 };
+}
+function dayHasContent(d) {
+  const x = S.days[d]; if (!x) return false;
+  return !!(x.spend || x.gratitude || x.money || x.felt || x.learned || x.thankful || x.energy || (x.focus || []).some(f => f && f.t));
+}
+
+function renderToday() {
+  const t = todayISO();
+  const d = UI.date;
+  const p = phaseFor(d);
+  const day = S.days[d] || {};
+  const dayN = diffDays(PLAN_START, d) + 1;
+  const prog = phaseProgress(p);
+
+  // Hero
+  let dayLabel;
+  if (d < PLAN_START) dayLabel = `<div class="daynum">T−${diffDays(d, PLAN_START)}<small>DAYS TO DAY ONE</small></div>`;
+  else if (d > PLAN_END) dayLabel = `<div class="daynum">Done<small>PLAN COMPLETE</small></div>`;
+  else dayLabel = `<div class="daynum">${dayN}<small>DAY OF ${TOTAL_DAYS}</small></div>`;
+
+  const segs = PHASES.map(ph => {
+    const len = diffDays(ph.start, ph.end) + 1;
+    const fill = d < ph.start ? 0 : d > ph.end ? 1 : (diffDays(ph.start, d) + 1) / len;
+    return `<div class="seg" style="flex:${len}"><i style="width:${(fill * 100).toFixed(1)}%"></i></div>`;
+  }).join("");
+  const segLabels = PHASES.map(ph => `<span style="flex:${diffDays(ph.start, ph.end) + 1}" class="${ph.n === p.n ? "on" : ""}">P${ph.n}</span>`).join("");
+
+  const hero = `<section class="glass hi hero">
+    <div class="row between" style="align-items:flex-start">
+      <div class="stack" style="gap:8px">
+        <div class="phase-name">Phase ${p.n} · ${esc(p.name)}</div>
+        ${dayLabel}
+        <p class="verse">${esc(p.verse)}</p>
+      </div>
+      ${ring(prog.pct)}
+    </div>
+    <div class="timeline">${segs}</div>
+    <div class="tl-labels">${segLabels}</div>
+  </section>`;
+
+  const datebar = `<div class="datebar">
+    <button class="iconbtn" data-act="day" data-n="-1" aria-label="Previous day">${ICON.left}</button>
+    <div class="d"><b>${d === t ? "Today" : esc(fmtDay(d))}</b><span>${esc(fmtDay(d)).toUpperCase()}${d !== t ? ` · <button class="chip" data-act="today" style="min-height:22px;padding:0 8px;font-size:10px">Back to today</button>` : ""}</span></div>
+    <button class="iconbtn" data-act="day" data-n="1" aria-label="Next day" ${d >= t ? "disabled style=\"opacity:.35\"" : ""}>${ICON.right}</button>
+  </div>`;
+
+  // Nudges
+  const nudges = [];
+  const dt = parse(d);
+  if (day.rest) nudges.push(`<div class="glass nudge rest"><div class="ic">${ICON.moon}</div><div><b>Rest day</b><p>No work, no money checks. Cut a venture before cutting sleep.</p></div><span></span></div>`);
+  if (d === t) {
+    // 5 days without opening the log
+    const lastLogged = Object.keys(S.days).filter(k => k < t && dayHasContent(k)).sort().pop();
+    if (lastLogged && diffDays(lastLogged, t) > 5) nudges.push(`<div class="glass nudge warn"><div class="ic">${ICON.alert}</div><div><b>${diffDays(lastLogged, t) - 1} days since your last log</b><p>The plan says: call your accountability partner today${S.state.settings.partner ? ` (${esc(S.state.settings.partner)})` : ""}.</p></div><span></span></div>`);
+    const yest = addDays(t, -1), yest2 = addDays(t, -2);
+    if (t > addDays(PLAN_START, 1) && !dayHasContent(yest) && !(S.days[yest] || {}).rest && Object.keys(S.days).length)
+      nudges.push(`<div class="glass nudge warn"><div class="ic">${ICON.alert}</div><div><b>Missed yesterday</b><p>Miss once, resume; never miss twice. ${!dayHasContent(yest2) && !(S.days[yest2] || {}).rest ? "Two days now: log something small today." : "Today's log keeps the chain."}</p></div><span></span></div>`);
+  }
+  if (dt.getDay() === 0) {
+    const wk = S.reviews["w-" + weekKey(d)];
+    nudges.push(`<div class="glass nudge"><div class="ic">${ICON.cal}</div><div><b>Weekly review · 30 min</b><p>${wk && wk.done ? "Done for this week." : "Receipts, sweeps, pipeline, one money action, energy score."}</p></div><button class="btn sm ${wk && wk.done ? "ghost" : "primary"}" data-act="goweek">${wk && wk.done ? "Open" : "Start"}</button></div>`);
+  }
+  if (dt.getDate() <= 7 && d >= PLAN_START) {
+    const mk = monthOf(addMonths(monthOf(d), -1) + "-01");
+    const mr = S.reviews["m-" + mk];
+    if (mk >= "2026-11" && !(mr && mr.done)) nudges.push(`<div class="glass nudge"><div class="ic">${ICON.heart}</div><div><b>Monthly money date</b><p>Reflect on ${esc(fmtMonth(mk))}: 3 wins, 1 struggle, 1 lesson. Your wife joins the last 20 min.</p></div><button class="btn sm primary" data-act="gomonth" data-m="${mk}">Open</button></div>`);
+  }
+  if (RETREAT_MONTHS.includes(monthOf(d))) nudges.push(`<div class="glass nudge"><div class="ic">${ICON.star}</div><div><b>Quarterly retreat this month</b><p>Half day: review, salary decision, pause list, prayer for the next 90 days.</p></div><span></span></div>`);
+  if (d < PLAN_START && d === t) nudges.push(`<div class="glass nudge"><div class="ic">${ICON.star}</div><div><b>Day One is 1 Nov</b><p>You can start Week 1 early: write your “why” and the debt inventory.</p></div><button class="btn sm ghost" data-act="goplan" data-p="0">Week 1</button></div>`);
+
+  // Focus three
+  const focus = (day.focus || []).concat([{}, {}, {}]).slice(0, 3);
+  const focusHtml = focus.map((f, i) => `<div class="focus-row ${f.done ? "done" : ""}">
+      <button class="check" role="checkbox" aria-checked="${f.done ? "true" : "false"}" aria-label="Done" data-act="focusdone" data-i="${i}"><span class="box">${ICON.check}</span></button>
+      <input id="focus-${i}" data-day="focus" data-i="${i}" value="${esc(f.t || "")}" placeholder="${["The one thing that moves the plan", "A money action", "A relationship note or outreach"][i]}">
+    </div>`).join("");
+
+  // Plan wins in the active group
+  const gi = d < PLAN_START ? 0 : groupFor(p, d);
+  let winsHtml = "";
+  if (gi >= 0) {
+    const g = p.groups[gi];
+    const done = g.items.filter((_, ii) => S.state.checks[itemId(p.n, gi, ii)]).length;
+    winsHtml = `<section class="glass">
+      <div class="h"><span class="label">${esc(g.label)} wins</span><span class="meta">${done}/${g.items.length}</span></div>
+      <div class="bar" style="margin-bottom:6px"><i style="width:${(done / g.items.length * 100).toFixed(0)}%"></i></div>
+      <div class="checks">${g.items.map((it, ii) => { const id = itemId(p.n, gi, ii); return checkBtn(id, it, !!S.state.checks[id], S.state.checks[id] ? `<span class="when">done ${esc(fmtDay(S.state.checks[id]))}</span>` : ""); }).join("")}</div>
+      ${p.note && gi === p.groups.length - 1 ? `<p class="small dim" style="margin-top:8px">${esc(p.note)}</p>` : ""}
+    </section>`;
+  }
+
+  // Streak dots — last 14 days ending today
+  let dots = "";
+  for (let i = 13; i >= 0; i--) {
+    const k = addDays(t, -i);
+    const x = S.days[k] || {};
+    const cls = x.rest ? "rest" : dayHasContent(k) ? "on" : (k < t && k >= PLAN_START ? "miss" : "");
+    dots += `<i class="${cls} ${k === d ? "today" : ""}" title="${esc(fmtDay(k))}"></i>`;
+  }
+  const loggedCount = Object.keys(S.days).filter(dayHasContent).length;
+
+  const energy = [1, 2, 3, 4, 5].map(n => `<button class="chip" aria-pressed="${day.energy === n}" data-act="energy" data-n="${n}">${n}</button>`).join("");
+
+  return `${hero}
+  ${datebar}
+  ${nudges.join("")}
+  <section class="glass">
+    <div class="h"><span class="label">Today's three</span><span class="meta">${focus.filter(f => f.done).length}/3</span></div>
+    <div class="stack" style="gap:6px">${focusHtml}</div>
+  </section>
+  ${winsHtml}
+  <section class="glass">
+    <div class="h"><span class="label">Daily log · 5 min</span><button class="chip" aria-pressed="${!!day.rest}" data-act="rest">${ICON.moon.replace('<svg', '<svg width="13" height="13"')} Rest day</button></div>
+    <div class="stack" style="gap:12px">
+      <div class="grid2">
+        <label class="field"><span>Spent yesterday</span><div class="money"><input id="spend" inputmode="decimal" data-day="spend" value="${esc(day.spend || "")}" placeholder="0"></div></label>
+        <div class="field"><span>Income landed?</span><button class="btn" data-act="receipt" style="min-height:44px">Log receipt</button></div>
+      </div>
+      <label class="field"><span>One line of gratitude</span><input id="gratitude" data-day="gratitude" value="${esc(day.gratitude || "")}" placeholder="Thank you for…"></label>
+      <div class="field"><span>Energy</span><div class="chips energy">${energy}</div></div>
+    </div>
+  </section>
+  <section class="glass">
+    <div class="h"><span class="label">Testimony journal</span><span class="meta">5 lines</span></div>
+    <div class="stack" style="gap:12px">
+      <label class="field"><span>What happened with money</span><textarea id="j-money" rows="2" data-day="money">${esc(day.money || "")}</textarea></label>
+      <label class="field"><span>How I felt</span><textarea id="j-felt" rows="1" data-day="felt">${esc(day.felt || "")}</textarea></label>
+      <label class="field"><span>What I learned</span><textarea id="j-learned" rows="1" data-day="learned">${esc(day.learned || "")}</textarea></label>
+      <label class="field"><span>Thankful for</span><textarea id="j-thankful" rows="1" data-day="thankful">${esc(day.thankful || "")}</textarea></label>
+    </div>
+  </section>
+  <section class="glass">
+    <div class="h"><span class="label">Last 14 days</span><span class="meta">${loggedCount} days logged</span></div>
+    <div class="dots">${dots}</div>
+    <p class="small dim" style="margin-top:10px">Filled: logged · ring: rest day · red ring: missed. A bad week is information, not a verdict.</p>
+  </section>`;
+}
+
+/* ---------- PLAN ---------- */
+function renderPlan() {
+  const p = PHASES[UI.planPhase];
+  const t = todayISO();
+  const prog = phaseProgress(p);
+  const chips = PHASES.map(ph => { const pr = phaseProgress(ph); return `<button class="chip" aria-pressed="${ph.n === p.n}" data-act="phase" data-n="${ph.n}">P${ph.n} ${esc(ph.name)} <span class="mono" style="opacity:.7">${Math.round(pr.pct * 100)}%</span></button>`; }).join("");
+  const dateRange = `${fmtMonth(monthOf(p.start))}${p.start.slice(0, 7) !== p.end.slice(0, 7) ? " – " + fmtMonth(monthOf(p.end)) : ""}`;
+  const status = t < p.start ? `<span class="pill">Starts in ${diffDays(t, p.start)} days</span>` : t > p.end ? `<span class="pill good">Past</span>` : `<span class="pill ice">Now · day ${diffDays(p.start, t) + 1}/${diffDays(p.start, p.end) + 1}</span>`;
+
+  const pillars = p.pillars ? `<dl class="pillars" style="margin:14px 0 0">${Object.entries(p.pillars).map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join("")}</dl>` : "";
+  const groups = p.groups.map((g, gi) => {
+    const done = g.items.filter((_, ii) => S.state.checks[itemId(p.n, gi, ii)]).length;
+    const now = t >= g.from && t <= g.to;
+    return `<div class="group-h ${now ? "now" : ""}"><b>${esc(g.label)}${now ? " · now" : ""}</b><span class="mono dim small">${done}/${g.items.length}</span></div>
+      <div class="checks">${g.items.map((it, ii) => { const id = itemId(p.n, gi, ii); return checkBtn(id, it, !!S.state.checks[id]); }).join("")}</div>`;
+  }).join("");
+  const mDone = p.milestones.filter((_, i) => S.state.checks[`p${p.n}m${i}`]).length;
+  const xDone = p.exit.filter((_, i) => S.state.checks[`p${p.n}x${i}`]).length;
+
+  return `<div class="scroller" role="tablist" aria-label="Phases">${chips}</div>
+  <section class="glass hi phase-card">
+    <div class="row between wrap" style="margin-bottom:10px"><span class="dates">${esc(dateRange.toUpperCase())}</span>${status}</div>
+    <h2>Phase ${p.n}: ${esc(p.name)}</h2>
+    <p class="muted" style="margin-top:4px">${esc(p.theme)}</p>
+    <p class="verse" style="margin-top:10px">${esc(p.verse)}</p>
+    <p style="margin-top:12px;font-size:14px">${esc(p.goal)}</p>
+    ${pillars}
+    <div class="row" style="margin-top:16px;gap:12px"><div class="bar grow"><i style="width:${(prog.pct * 100).toFixed(0)}%"></i></div><span class="mono small dim">${prog.done}/${prog.total}</span></div>
+    <p class="small dim" style="margin-top:6px">Target income: ${kmoney(p.income[0])}–${kmoney(p.income[1])} / month</p>
+  </section>
+  <section class="glass"><div class="h"><span class="label">Checkable wins</span></div>${groups}${p.note ? `<p class="small dim" style="margin-top:10px">${esc(p.note)}</p>` : ""}</section>
+  <section class="glass">
+    <div class="h"><span class="label">Milestones</span><span class="meta">${mDone}/${p.milestones.length}</span></div>
+    <div class="checks">${p.milestones.map((m, i) => checkBtn(`p${p.n}m${i}`, m, !!S.state.checks[`p${p.n}m${i}`])).join("")}</div>
+  </section>
+  <section class="glass">
+    <div class="h"><span class="label">${p.n === 4 ? "Project complete when" : "Exit gate"}</span><span class="meta">${xDone}/${p.exit.length}</span></div>
+    <div class="checks">${p.exit.map((m, i) => checkBtn(`p${p.n}x${i}`, m, !!S.state.checks[`p${p.n}x${i}`])).join("")}</div>
+    <p class="small dim" style="margin-top:8px">Dates are targets; the gates are the rule. If a gate is red, stay and strengthen, with no guilt.</p>
+  </section>
+  <section class="glass"><div class="h"><span class="label">The challenge</span></div><p class="callout">${esc(p.challenge)}</p></section>
+  <section class="glass">
+    <details class="fold"><summary>Non-negotiables</summary><div class="inner"><ol class="plain">${NON_NEGOTIABLES.map(x => `<li>${esc(x)}</li>`).join("")}</ol></div></details>
+    <details class="fold"><summary>Signed pause list · until Feb 2028</summary><div class="inner"><div class="chips">${PAUSE_LIST.map(x => `<span class="pill">${esc(x)}</span>`).join("")}</div><p class="small dim" style="margin-top:10px">Two engines, one build slot, one maintenance lane. Any new venture must pass the 90-day earning test.</p></div></details>
+    <details class="fold"><summary>Investing learning path</summary><div class="inner"><div class="checks">${MODULES.map((m, i) => checkBtn(`mod${i}`, `${m[1]} → ${m[2]}`, !!S.state.checks[`mod${i}`], `<span class="when">${esc(m[0])}</span>`)).join("")}</div><p class="small dim" style="margin-top:8px">For the first 12 months you are a student, not an investor.</p></div></details>
+    <details class="fold"><summary>Debt roadmap markers</summary><div class="inner"><div class="tablewrap"><table class="t"><thead><tr><th>Marker</th><th>Target</th></tr></thead><tbody>${DEBT_MARKERS.map(m => `<tr class="${nextDebtMarker(t) === m ? "on" : ""}"><td style="white-space:normal">${esc(m.label)}</td><td class="n">${esc(fmtMonth(monthOf(m.date)))}</td></tr>`).join("")}</tbody></table></div>
+      <p class="small dim" style="margin-top:8px">Fix anything late first. Any debt above ~20% p.a. is Debt #1. Roll each freed minimum onto the next target.</p></div></details>
+  </section>`;
+}
+
+/* ---------- JOURNAL ---------- */
+function renderJournal() {
+  const tabs = [["daily", "Daily"], ["weekly", "Weekly review"], ["monthly", "Monthly"]].map(([k, l]) => `<button class="chip" aria-pressed="${UI.jTab === k}" data-act="jtab" data-k="${k}">${l}</button>`).join("");
+  let body = "";
+  if (UI.jTab === "daily") {
+    const keys = Object.keys(S.days).filter(dayHasContent).sort().reverse();
+    body = keys.length ? keys.slice(0, 120).map(k => {
+      const x = S.days[k];
+      const text = [x.money, x.felt, x.learned, x.thankful && "Thankful: " + x.thankful, x.gratitude].filter(Boolean).join(" · ");
+      return `<button class="entry" data-act="openday" data-d="${k}"><div class="ed"><span>${esc(fmtDay(k).toUpperCase())} · P${phaseFor(k).n}</span><span>${x.rest ? "rest" : x.energy ? "energy " + x.energy + "/5" : ""}${x.spend ? " · spent " + money(num(x.spend)) : ""}</span></div><p>${esc(text || (x.focus || []).map(f => f && f.t).filter(Boolean).join(" · ") || "Logged")}</p></button>`;
+    }).join("") : `<div class="glass empty"><b>No entries yet</b>Your Day Zero entry goes here: income, debt, savings, feelings, no fixing yet. Write it from the Today tab.</div>`;
+  } else if (UI.jTab === "weekly") {
+    const k = "w-" + UI.week;
+    const r = S.reviews[k] || {};
+    const steps = [["receipts", "Receipts checked and recorded"], ["sweeps", "Every receipt swept: Tax, Giving, Emergency, Debt"], ["pipeline", "Pipeline: money in the next 30 days checked"], ["outreach", "Five relationship-first notes sent"], ["rested", "One full rest day kept"]];
+    const energy = [1, 2, 3, 4, 5].map(n => `<button class="chip" aria-pressed="${r.energy === n}" data-act="wenergy" data-n="${n}">${n}</button>`).join("");
+    const past = Object.keys(S.reviews).filter(x => x.startsWith("w-") && S.reviews[x].done).sort().reverse();
+    const lowEnergy = past.slice(0, 2).length === 2 && past.slice(0, 2).every(x => (S.reviews[x].energy || 5) <= 2);
+    body = `<div class="datebar">
+        <button class="iconbtn" data-act="week" data-n="-7" aria-label="Previous week">${ICON.left}</button>
+        <div class="d"><b>Week ending ${esc(fmtDay(UI.week))}</b><span>SUNDAY EVENING · 30 MIN</span></div>
+        <button class="iconbtn" data-act="week" data-n="7" aria-label="Next week">${ICON.right}</button>
+      </div>
+      ${lowEnergy ? `<div class="glass nudge warn"><div class="ic">${ICON.alert}</div><div><b>Energy at 2 or below for two weeks</b><p>The plan's rule: cut a venture, not sleep.</p></div><span></span></div>` : ""}
+      <section class="glass">
+        <div class="checks">${steps.map(([id, l]) => `<button class="check" role="checkbox" aria-checked="${r[id] ? "true" : "false"}" data-act="wcheck" data-id="${id}"><span class="box">${ICON.check}</span><span class="txt">${esc(l)}</span></button>`).join("")}</div>
+      </section>
+      <section class="glass stack" style="gap:12px">
+        <label class="field"><span>Money in the next 30 days</span><div class="money"><input id="w-next30" inputmode="decimal" data-rev="next30" value="${esc(r.next30 || "")}" placeholder="0"></div></label>
+        <label class="field"><span>Pipeline notes</span><textarea id="w-pipeline" rows="2" data-rev="pipeline" placeholder="Next actions, follow-ups, proposals out">${esc(r.pipeline || "")}</textarea></label>
+        <label class="field"><span>One money action for next week</span><input id="w-action" data-rev="action" value="${esc(r.action || "")}" placeholder="e.g. Call the card issuer about the rate"></label>
+        <div class="field"><span>Energy this week</span><div class="chips energy">${energy}</div></div>
+        <button class="btn ${r.done ? "ghost" : "primary"}" data-act="wdone">${r.done ? "Review done · tap to reopen" : "Mark review done"}</button>
+      </section>
+      ${past.length ? `<section class="glass"><div class="h"><span class="label">Past reviews</span><span class="meta">${past.length}</span></div>${past.slice(0, 12).map(x => `<div class="list-row"><span>${esc(fmtDay(x.slice(2)))}</span><span class="dim small">${esc(S.reviews[x].action || "")}</span><span class="mono small">${S.reviews[x].energy ? "E" + S.reviews[x].energy : ""}</span></div>`).join("")}</section>` : ""}`;
+  } else {
+    const k = "m-" + UI.month;
+    const r = S.reviews[k] || {};
+    const f = (id, label, rows, ph) => `<label class="field"><span>${label}</span><textarea id="m-${id}" rows="${rows}" data-rev="${id}" placeholder="${ph}">${esc(r[id] || "")}</textarea></label>`;
+    const past = Object.keys(S.reviews).filter(x => x.startsWith("m-") && S.reviews[x].done).sort().reverse();
+    body = `<div class="datebar">
+        <button class="iconbtn" data-act="month" data-n="-1" aria-label="Previous month">${ICON.left}</button>
+        <div class="d"><b>${esc(fmtMonth(UI.month))}</b><span>MONTHLY REFLECTION · P${phaseFor(UI.month + "-15").n}</span></div>
+        <button class="iconbtn" data-act="month" data-n="1" aria-label="Next month">${ICON.right}</button>
+      </div>
+      <section class="glass stack" style="gap:12px">
+        ${f("wins", "3 wins", 3, "1.\n2.\n3.")}
+        ${f("struggle", "1 struggle", 1, "")}
+        ${f("lesson", "1 lesson", 1, "")}
+        ${f("next", "Next step", 1, "")}
+        ${f("scripture", "One Scripture", 1, "e.g. Lam 3:22–23")}
+      </section>
+      <section class="glass">
+        <div class="checks">
+          <button class="check" role="checkbox" aria-checked="${r.date ? "true" : "false"}" data-act="mcheck" data-id="date"><span class="box">${ICON.check}</span><span class="txt">Money date held (60–90 min)</span></button>
+          <button class="check" role="checkbox" aria-checked="${r.wife ? "true" : "false"}" data-act="mcheck" data-id="wife"><span class="box">${ICON.check}</span><span class="txt">Your wife joined the last 20 minutes</span></button>
+          <button class="check" role="checkbox" aria-checked="${r.dash ? "true" : "false"}" data-act="mcheck" data-id="dash"><span class="box">${ICON.check}</span><span class="txt">Dashboard updated in Track</span></button>
+        </div>
+        <button class="btn ${r.done ? "ghost" : "primary"}" data-act="mdone" style="width:100%;margin-top:12px">${r.done ? "Reflection done · tap to reopen" : "Mark reflection done"}</button>
+      </section>
+      ${past.length ? `<section class="glass"><div class="h"><span class="label">Past reflections</span><span class="meta">${past.length}</span></div>${past.map(x => `<button class="list-row" style="width:100%;background:none;border-left:0;border-right:0;border-top:0;text-align:left" data-act="gomonth" data-m="${x.slice(2)}"><span>${esc(fmtMonth(x.slice(2)))}</span><span class="dim small" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px">${esc(S.reviews[x].lesson || "")}</span><span class="mono small">›</span></button>`).join("")}</section>` : ""}`;
+  }
+  return `<div class="chips">${tabs}</div>${body}`;
+}
+
+/* ---------- TRACK ---------- */
+function renderTrack() {
+  const t = todayISO();
+  const ym = monthOf(t);
+  const p = phaseFor(t);
+  const snap = latestSnap() || {};
+  const e = E();
+  const byMonth = incomeByMonth();
+  const thisMonth = byMonth[ym] || 0;
+  const a3 = avg3(addMonths(ym, 1)); // includes this month
+  const startDebt = num(S.state.settings.startDebt);
+  const debtLeft = snap.debt !== undefined && snap.debt !== "" ? num(snap.debt) : null;
+  const cleared = startDebt && debtLeft !== null ? Math.max(0, 1 - debtLeft / startDebt) : null;
+  const marker = nextDebtMarker(t);
+  const year = t.slice(0, 4);
+  const givingMTD = S.state.receipts.filter(r => monthOf(r.date) === ym).reduce((s, r) => s + num((r.alloc || {}).give), 0);
+  const givingYTD = S.state.receipts.filter(r => r.date.slice(0, 4) === year).reduce((s, r) => s + num((r.alloc || {}).give), 0);
+  const emer = snap.emergency !== undefined && snap.emergency !== "" ? num(snap.emergency) : null;
+  const et = emergencyTarget(t);
+  const g = gates();
+  const lo = p.income[0];
+  const incomeState = thisMonth >= lo ? "good" : thisMonth >= lo * 0.6 ? "warn" : "";
+
+  // Bars: last 6 months
+  const months = []; for (let i = 5; i >= 0; i--) months.push(addMonths(ym, -i));
+  const maxV = Math.max(1, ...months.map(m => byMonth[m] || 0), p.income[1]);
+  const bars = months.map(m => `<div class="b ${m === ym ? "now" : ""}"><span>${(byMonth[m] || 0) ? kmoney(byMonth[m]) : ""}</span><i style="height:${((byMonth[m] || 0) / maxV * 78).toFixed(1)}%"></i><span>${MONTHS[+m.slice(5) - 1]}</span></div>`).join("");
+
+  const recent = S.state.receipts.slice().sort((a, b) => b.date.localeCompare(a.date)).slice(0, 8);
+
+  const stones = STONES.map((s, i) => { const laid = S.state.stones[i + 1]; return `<button class="stone ${laid ? "laid" : ""}" data-act="stone" data-n="${i + 1}" aria-pressed="${!!laid}" title="${esc(s[0])} · ${esc(s[1])}"><span class="n">${i + 1}</span><span class="t">${esc(s[0])}</span></button>`; }).join("");
+  const laidCount = Object.keys(S.state.stones).length;
+
+  return `<section class="glass hi">
+    <div class="h"><span class="label">Sweep a receipt</span><span class="meta">P${p.n} split</span></div>
+    <p class="small muted" style="margin-bottom:12px">The day a payment lands: Tax, Giving, Emergency and Debt out first; the rest funds your fixed salary.</p>
+    <button class="btn primary" data-act="receipt" style="width:100%">Log a receipt</button>
+  </section>
+
+  <div class="tiles">
+    <div class="glass tile wide">
+      <div class="row between"><span class="label">Income · ${esc(fmtMonth(ym))}</span>${incomeState ? `<span class="pill ${incomeState}">${incomeState === "good" ? "on target" : "building"}</span>` : ""}</div>
+      <div class="v">${money(thisMonth)}</div>
+      <div class="s">3-month avg ${money(a3)} · target ${kmoney(p.income[0])}–${kmoney(p.income[1])}</div>
+      <div class="bars" aria-label="Income for the last 6 months">${bars}</div>
+    </div>
+    <div class="glass tile">
+      <span class="label">Emergency</span>
+      <div class="v">${emer === null ? "—" : e ? (emer / e).toFixed(1) + "<span class=\"small dim\"> mo</span>" : money(emer)}</div>
+      <div class="s">${emer === null ? "Add balances below" : `${money(emer)} · target ${et.label}${et.amount ? "" : " (set essentials)"}`}</div>
+    </div>
+    <div class="glass tile">
+      <span class="label">Debt left</span>
+      <div class="v">${debtLeft === null ? "—" : kmoney(debtLeft)}</div>
+      <div class="s">${cleared === null ? (startDebt ? "Add balances below" : "Set starting total") : `${Math.round(cleared * 100)}% cleared · next ${marker.pct}% by ${MONTHS[+marker.date.slice(5, 7) - 1]} ${marker.date.slice(2, 4)}`}</div>
+    </div>
+    <div class="glass tile">
+      <span class="label">Giving</span>
+      <div class="v">${money(givingMTD)}</div>
+      <div class="s">${ALLOC[p.n].give}% · YTD ${money(givingYTD)}</div>
+    </div>
+    <div class="glass tile">
+      <span class="label">Net worth</span>
+      <div class="v">${snap.net !== undefined && snap.net !== "" ? kmoney(num(snap.net)) : "—"}</div>
+      <div class="s">${snap.date ? "as of " + esc(fmtDay(snap.date)) : "Negative at the start is fine"}</div>
+    </div>
+  </div>
+
+  <section class="glass">
+    <div class="h"><span class="label">Update balances</span><span class="meta">${S.state.snaps.length} updates</span></div>
+    <div class="grid2">
+      <label class="field"><span>Emergency pot</span><div class="money"><input id="b-emergency" inputmode="decimal" value="${esc(snap.emergency ?? "")}" placeholder="0"></div></label>
+      <label class="field"><span>Debt remaining</span><div class="money"><input id="b-debt" inputmode="decimal" value="${esc(snap.debt ?? "")}" placeholder="0"></div></label>
+      <label class="field"><span>Hub buffer</span><div class="money"><input id="b-hub" inputmode="decimal" value="${esc(snap.hub ?? "")}" placeholder="0"></div></label>
+      <label class="field"><span>Net worth</span><div class="money"><input id="b-net" inputmode="text" value="${esc(snap.net ?? "")}" placeholder="-25000"></div></label>
+    </div>
+    <button class="btn" data-act="snap" style="width:100%;margin-top:12px">Save balances</button>
+  </section>
+
+  <section class="glass">
+    <div class="h"><span class="label">Investing gates</span><span class="meta">${[g.g1, g.g2, g.g3].filter(Boolean).length}/3 green</span></div>
+    <div class="gate"><span class="g">G1</span><p>Emergency fund ≥ 1 month of essentials${e ? ` (${money(e)})` : ""}</p><span class="pill ${g.g1 ? "good" : ""}">${g.g1 ? "green" : "auto"}</span></div>
+    <div class="gate"><span class="g">G2</span><p>All debt above ~8% p.a. cleared, or on a funded, on-track plan</p><button class="chip" aria-pressed="${g.g2}" data-act="gate" data-g="g2">${g.g2 ? "green" : "red"}</button></div>
+    <div class="gate"><span class="g">G3</span><p>3 months where income covers salary, giving, tax, debt and savings</p><button class="chip" aria-pressed="${g.g3}" data-act="gate" data-g="g3">${g.g3 ? "green" : "red"}</button></div>
+    <p class="small dim" style="margin-top:8px">Earliest real money: Nov 2027. $50–100 a month into one broad, low-cost index fund.</p>
+  </section>
+
+  <section class="glass">
+    <div class="h"><span class="label">Ebenezer stones</span><span class="meta">${laidCount}/12 laid</span></div>
+    <div class="stones">${stones}</div>
+    <p class="verse" style="margin-top:12px">“Thus far the LORD has helped us.” 1 Sam 7:12</p>
+  </section>
+
+  <section class="glass">
+    <div class="h"><span class="label">Recent receipts</span><span class="meta">${S.state.receipts.length}</span></div>
+    ${recent.length ? recent.map(r => `<div class="list-row"><span class="grow" style="min-width:0"><span style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.client || r.stream || "Receipt")}</span><span class="dim small mono">${esc(fmtDay(r.date))} · give ${money(num((r.alloc || {}).give))}</span></span><span class="mono">${money(num(r.amount))}</span><button class="x" data-act="delreceipt" data-id="${esc(r.id)}" aria-label="Delete receipt">✕</button></div>`).join("") : `<p class="small dim">No receipts yet. Log the first deposit to see your split.</p>`}
+  </section>
+
+  <section class="glass">
+    <div class="h"><span class="label">Your numbers</span></div>
+    <div class="stack" style="gap:12px">
+      <label class="field"><span>Monthly essentials (E), from “My Numbers”</span><div class="money"><input id="s-essentials" inputmode="decimal" data-set="essentials" value="${esc(S.state.settings.essentials || "")}" placeholder="0"></div></label>
+      <label class="field"><span>Starting total debt (from the inventory)</span><div class="money"><input id="s-startDebt" inputmode="decimal" data-set="startDebt" value="${esc(S.state.settings.startDebt || "")}" placeholder="0"></div></label>
+      <label class="field"><span>Accountability partner</span><input id="s-partner" data-set="partner" value="${esc(S.state.settings.partner || "")}" placeholder="Church friend"></label>
+      <div class="row wrap" style="gap:8px">
+        <button class="btn sm ghost" data-act="export">Save a backup</button>
+        <label class="btn sm ghost" for="importfile" style="cursor:pointer">Restore backup</label>
+        <input id="importfile" type="file" accept="application/json,.json" hidden>
+      </div>
+      <p class="small dim">${S.backend.kind === "db" ? "Saved privately to your account. Only you can see these entries." : "Saved on this device only. Use backups to move between devices."} Education and structure, not licensed advice.</p>
+    </div>
+  </section>`;
+}
+
+/* ---------- SHEETS ---------- */
+function openSheet(html, onMount) {
+  closeSheet();
+  const bg = document.createElement("div");
+  bg.className = "sheet-bg"; bg.id = "sheet";
+  bg.innerHTML = `<div class="sheet" role="dialog" aria-modal="true">${html}</div>`;
+  bg.addEventListener("click", ev => { if (ev.target === bg) closeSheet(); });
+  document.body.appendChild(bg);
+  onMount && onMount(bg);
+}
+function closeSheet() { const s = document.getElementById("sheet"); if (s) s.remove(); }
+
+function receiptSheet() {
+  const t = todayISO();
+  openSheet(`<div class="stack">
+    <div class="row between"><h2 style="font-size:14px">Log a receipt</h2><button class="x" data-close aria-label="Close">✕</button></div>
+    <div class="grid2">
+      <label class="field"><span>Amount received</span><div class="money"><input id="r-amount" inputmode="decimal" placeholder="0" autofocus></div></label>
+      <label class="field"><span>Date</span><input id="r-date" type="date" value="${t}"></label>
+    </div>
+    <label class="field"><span>Client</span><input id="r-client" placeholder="e.g. ACMI retainer"></label>
+    <label class="field"><span>Stream</span><select id="r-stream">${STREAMS.map(s => `<option>${esc(s)}</option>`).join("")}</select></label>
+    <p class="small dim">After direct costs and subcontractors.</p>
+    <div class="split" id="r-split"></div>
+    <p class="small dim" id="r-note"></p>
+    <button class="btn primary" id="r-save">Log and sweep</button>
+  </div>`, bg => {
+    const amt = bg.querySelector("#r-amount"), dte = bg.querySelector("#r-date");
+    const paint = () => {
+      const a = num(amt.value);
+      const { out, phase, note } = allocate(a, dte.value || t);
+      bg.querySelector("#r-split").innerHTML = BUCKETS.map(([k, l]) => {
+        const pct = a ? out[k] / a : 0;
+        return `<div class="ln ${k}"><span class="nm">${l}</span><div class="bar"><i style="width:${(pct * 100).toFixed(1)}%"></i></div><span class="amt">${money(out[k], 2)}</span></div>`;
+      }).join("");
+      bg.querySelector("#r-note").textContent = `Phase ${phase.n} split.${phase.n === 0 ? " Emergency takes the first $500, salary takes the rest." : ""} ${note} Thin month: trim Invest, then Debt extra, then Emergency; never Tax or Giving.`;
+    };
+    amt.addEventListener("input", paint); dte.addEventListener("change", paint); paint();
+    bg.querySelector("[data-close]").onclick = closeSheet;
+    bg.querySelector("#r-save").onclick = () => {
+      const a = num(amt.value);
+      if (a <= 0) { amt.focus(); toast("Enter the amount that landed"); return; }
+      const date = dte.value || t;
+      const { out } = allocate(a, date);
+      S.state.receipts.push({ id: "r" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), date, amount: a, client: bg.querySelector("#r-client").value.trim(), stream: bg.querySelector("#r-stream").value, alloc: out });
+      saveState(0); closeSheet(); render();
+      toast(`Swept: ${money(out.give, 2)} to Giving, ${money(out.tax, 2)} to Tax`);
+    };
+  });
+}
+
+function stoneSheet(n) {
+  const s = STONES[n - 1], laid = S.state.stones[n];
+  openSheet(`<div class="stack">
+    <div class="row between"><span class="label">Ebenezer stone #${n} · ${esc(s[1])}</span><button class="x" data-close aria-label="Close">✕</button></div>
+    <h2>${esc(s[0])}</h2>
+    <label class="field"><span>What God did</span><textarea id="st-note" rows="3" placeholder="A line to remember this by">${esc(laid ? laid.note : "")}</textarea></label>
+    <div class="row" style="gap:8px">
+      <button class="btn primary grow" id="st-save">${laid ? "Update stone" : "Lay this stone"}</button>
+      ${laid ? `<button class="btn ghost" id="st-del">Remove</button>` : ""}
+    </div>
+    ${laid ? `<p class="small dim">Laid ${esc(fmtDay(laid.date))}</p>` : `<p class="small dim">Celebrate without spending: a thank-you note, a family walk, a home-cooked meal, the wins jar.</p>`}
+  </div>`, bg => {
+    bg.querySelector("[data-close]").onclick = closeSheet;
+    bg.querySelector("#st-save").onclick = () => {
+      S.state.stones[n] = { date: laid ? laid.date : todayISO(), note: bg.querySelector("#st-note").value.trim() };
+      saveState(0); closeSheet(); render(); toast(laid ? "Stone updated" : `Stone #${n} laid`);
+    };
+    const del = bg.querySelector("#st-del");
+    if (del) del.onclick = () => { delete S.state.stones[n]; saveState(0); closeSheet(); render(); };
+  });
+}
+
+/* ============================================================
+   EVENTS
+   ============================================================ */
+function setTab(tab) {
+  UI.tab = tab;
+  try { localStorage.setItem("mazarus:ui:tab", tab); } catch (e) {}
+  render();
+  window.scrollTo({ top: 0 });
+}
+document.getElementById("tabs").addEventListener("click", ev => {
+  const b = ev.target.closest("button[data-tab]"); if (b) setTab(b.dataset.tab);
+});
+
+function ensureDay(d) { return S.days[d] || (S.days[d] = {}); }
+
+document.addEventListener("click", async ev => {
+  const el = ev.target.closest("[data-act]");
+  if (!el || !S.ready) return;
+  const act = el.dataset.act;
+  const t = todayISO();
+  switch (act) {
+    case "toggle": {
+      const id = el.dataset.id;
+      if (S.state.checks[id]) delete S.state.checks[id]; else S.state.checks[id] = t;
+      saveState(400); render(); break;
+    }
+    case "day": {
+      const nd = addDays(UI.date, +el.dataset.n);
+      if (nd <= t) { UI.date = nd; render(); }
+      break;
+    }
+    case "today": UI.date = t; render(); break;
+    case "focusdone": {
+      const day = ensureDay(UI.date); const i = +el.dataset.i;
+      day.focus = (day.focus || []).concat([{}, {}, {}]).slice(0, 3).map(f => f || {});
+      day.focus[i] = { ...day.focus[i], done: !day.focus[i].done };
+      saveDay(UI.date); render(); break;
+    }
+    case "energy": { const day = ensureDay(UI.date); const n = +el.dataset.n; day.energy = day.energy === n ? 0 : n; saveDay(UI.date); render(); break; }
+    case "rest": { const day = ensureDay(UI.date); day.rest = !day.rest; saveDay(UI.date); render(); break; }
+    case "receipt": receiptSheet(); break;
+    case "goweek": UI.jTab = "weekly"; UI.week = weekKey(UI.date); setTab("journal"); break;
+    case "gomonth": UI.jTab = "monthly"; UI.month = el.dataset.m; setTab("journal"); break;
+    case "goplan": UI.planPhase = +el.dataset.p; setTab("plan"); break;
+    case "phase": UI.planPhase = +el.dataset.n; render(); break;
+    case "jtab": UI.jTab = el.dataset.k; render(); break;
+    case "openday": UI.date = el.dataset.d; setTab("today"); break;
+    case "week": UI.week = addDays(UI.week, +el.dataset.n); render(); break;
+    case "month": UI.month = addMonths(UI.month, +el.dataset.n); render(); break;
+    case "wcheck": case "wenergy": case "wdone": {
+      const k = "w-" + UI.week; const r = S.reviews[k] || (S.reviews[k] = {});
+      if (act === "wcheck") r[el.dataset.id] = !r[el.dataset.id];
+      if (act === "wenergy") { const n = +el.dataset.n; r.energy = r.energy === n ? 0 : n; }
+      if (act === "wdone") { r.done = !r.done; if (r.done) toast("Weekly review done"); }
+      saveReview(k); render(); break;
+    }
+    case "mcheck": case "mdone": {
+      const k = "m-" + UI.month; const r = S.reviews[k] || (S.reviews[k] = {});
+      if (act === "mcheck") r[el.dataset.id] = !r[el.dataset.id];
+      if (act === "mdone") { r.done = !r.done; if (r.done) toast("Reflection saved"); }
+      saveReview(k); render(); break;
+    }
+    case "snap": {
+      const v = id => document.getElementById(id).value.trim();
+      S.state.snaps.push({ date: t, emergency: v("b-emergency"), debt: v("b-debt"), hub: v("b-hub"), net: v("b-net") });
+      if (S.state.snaps.length > 400) S.state.snaps = S.state.snaps.slice(-400);
+      saveState(0); render(); toast("Balances saved"); break;
+    }
+    case "gate": S.state.gates[el.dataset.g] = !S.state.gates[el.dataset.g]; saveState(300); render(); break;
+    case "stone": stoneSheet(+el.dataset.n); break;
+    case "delreceipt": {
+      if (el.dataset.confirm !== "1") { el.dataset.confirm = "1"; el.textContent = "Delete?"; el.style.width = "auto"; el.style.color = "var(--bad)"; setTimeout(() => { if (el.isConnected) { el.dataset.confirm = ""; el.textContent = "✕"; el.style.color = ""; el.style.width = ""; } }, 3000); break; }
+      S.state.receipts = S.state.receipts.filter(r => r.id !== el.dataset.id); saveState(0); render(); break;
+    }
+    case "export": {
+      const data = JSON.stringify({ app: "mazarus", version: 1, exported: new Date().toISOString(), state: S.state, days: S.days, reviews: S.reviews }, null, 2);
+      let saved = false;
+      try {
+        const dl = window.claude && await window.claude.use("downloads");
+        if (dl) { await dl.save({ filename: `mazarus-backup-${t}.json`, data }); saved = true; toast("Backup saved"); }
+      } catch (e) { if (e && e.code === "declined") return; }
+      if (!saved) {
+        try { await navigator.clipboard.writeText(data); toast("Backup copied to clipboard"); }
+        catch (e) { toast("Backup could not be saved here"); }
+      }
+      break;
+    }
+  }
+});
+
+document.addEventListener("input", ev => {
+  const el = ev.target;
+  if (!S.ready) return;
+  if (el.dataset.day) {
+    const day = ensureDay(UI.date);
+    if (el.dataset.day === "focus") {
+      const i = +el.dataset.i;
+      day.focus = (day.focus || []).concat([{}, {}, {}]).slice(0, 3).map(f => f || {});
+      day.focus[i] = { ...day.focus[i], t: el.value };
+    } else day[el.dataset.day] = el.value;
+    saveDay(UI.date);
+  } else if (el.dataset.rev) {
+    const k = (UI.jTab === "weekly" ? "w-" + UI.week : "m-" + UI.month);
+    const r = S.reviews[k] || (S.reviews[k] = {});
+    r[el.dataset.rev] = el.value; saveReview(k);
+  } else if (el.dataset.set) {
+    S.state.settings[el.dataset.set] = el.value; saveState();
+  }
+});
+
+document.addEventListener("change", ev => {
+  if (ev.target.id !== "importfile") return;
+  const f = ev.target.files && ev.target.files[0]; if (!f) return;
+  const rd = new FileReader();
+  rd.onload = () => {
+    try {
+      const j = JSON.parse(rd.result);
+      if (j.app !== "mazarus" || !j.state) throw 0;
+      S.state = Object.assign(blankState(), j.state);
+      S.days = j.days || {}; S.reviews = j.reviews || {};
+      saveState(0);
+      Object.keys(S.days).forEach(saveDay);
+      Object.keys(S.reviews).forEach(saveReview);
+      render(); toast("Backup restored");
+    } catch (e) { toast("That file is not a Mazarus backup"); }
+  };
+  rd.readAsText(f);
+});
+
+document.addEventListener("keydown", ev => { if (ev.key === "Escape") closeSheet(); });
+// Roll over to the new day if the app stays open past midnight
+let lastToday = todayISO();
+setInterval(() => { const t = todayISO(); if (t !== lastToday) { if (UI.date === lastToday) UI.date = t; lastToday = t; softRender(); } }, 60000);
+
+boot();
+</script>
