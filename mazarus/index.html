@@ -358,6 +358,15 @@ ol.plain { margin: 0; padding-left: 18px; display: flex; flex-direction: column;
 @keyframes pop { 0% { opacity: 0; transform: translate(-50%, -45%) scale(.9); } 12% { opacity: 1; transform: translate(-50%, -50%) scale(1); } 80% { opacity: 1; } 100% { opacity: 0; } }
 .screen { animation: rise .35s ease both; }
 @keyframes rise { from { transform: translateY(6px); } to { transform: none; } }
+.screen.in-next { animation: inNext .28s ease both; }
+.screen.in-prev { animation: inPrev .28s ease both; }
+@keyframes inNext { from { transform: translateX(28px); opacity: .4; } to { transform: none; opacity: 1; } }
+@keyframes inPrev { from { transform: translateX(-28px); opacity: .4; } to { transform: none; opacity: 1; } }
+#main { touch-action: pan-y; }
+.swipe-hint { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(96px + env(safe-area-inset-bottom, 0px)); z-index: 60; display: flex; align-items: center; gap: 10px; padding: 9px 16px; border-radius: 999px; background: rgba(20,28,56,.95); border: 1px solid var(--edge-hi); font-size: 12.5px; color: var(--ink-2); white-space: nowrap; }
+.swipe-hint i { width: 18px; height: 2px; border-radius: 1px; background: var(--grad); animation: nudge 1.2s ease-in-out infinite alternate; }
+@keyframes nudge { from { transform: translateX(-6px); } to { transform: translateX(6px); } }
+@media (prefers-reduced-motion: reduce) { .screen.in-next, .screen.in-prev, .swipe-hint i { animation: none; } }
 .splash { padding: 60px 0; text-align: center; color: var(--ink-3); font-family: var(--f-mono); font-size: 12px; }
 </style>
 
@@ -1002,7 +1011,8 @@ function render() {
     if (b.dataset.tab === "journal" && due && UI.tab !== "journal") b.insertAdjacentHTML("beforeend", '<i class="badge"></i>');
   });
   const html = { today: renderToday, map: renderMap, gear: renderGear, journal: renderJournal, money: renderMoney }[UI.tab]();
-  main().innerHTML = `<div class="screen stack">${html}</div>`;
+  main().innerHTML = `<div class="screen stack ${UI.enter ? "in-" + UI.enter : ""}">${html}</div>`;
+  UI.enter = null;
 }
 const modHead = (icon, title, sub, right = "") => `<div class="mod-h"><div class="mod-ic">${icon}</div><div class="mod-t"><b>${title}</b><span>${sub}</span></div>${right}</div>`;
 
@@ -1713,12 +1723,45 @@ function stoneSheet(n) {
 /* ============================================================
    EVENTS
    ============================================================ */
-function setTab(tab) {
+function setTab(tab, enter) {
+  UI.enter = enter || (VALID_TABS.indexOf(tab) > VALID_TABS.indexOf(UI.tab) ? "next" : VALID_TABS.indexOf(tab) < VALID_TABS.indexOf(UI.tab) ? "prev" : null);
   UI.tab = tab;
   try { localStorage.setItem("mazarus:ui:tab", tab); } catch (e) {}
   render(); window.scrollTo({ top: 0 });
 }
 document.getElementById("tabs").addEventListener("click", ev => { const b = ev.target.closest("button[data-tab]"); if (b) setTab(b.dataset.tab); });
+
+/* Swipe left/right anywhere on the page to move between tabs (dock order). */
+(() => {
+  let sx = 0, sy = 0, st = 0, track = false;
+  const blocked = el => el.closest("input, textarea, select, .tablewrap, .chips, .bars, .sheet-bg, .tabs");
+  document.addEventListener("touchstart", ev => {
+    track = false;
+    if (ev.touches.length !== 1 || document.getElementById("sheet")) return;
+    const tch = ev.touches[0];
+    if (tch.clientX < 24 || tch.clientX > window.innerWidth - 24) return; // leave the system edge-swipe alone
+    if (blocked(ev.target)) return;
+    sx = tch.clientX; sy = tch.clientY; st = Date.now(); track = true;
+  }, { passive: true });
+  document.addEventListener("touchend", ev => {
+    if (!track) return; track = false;
+    const tch = ev.changedTouches[0], dx = tch.clientX - sx, dy = tch.clientY - sy;
+    if (Date.now() - st > 700 || Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.6) return;
+    const i = VALID_TABS.indexOf(UI.tab), j = i + (dx < 0 ? 1 : -1);
+    if (j < 0 || j >= VALID_TABS.length) return;
+    setTab(VALID_TABS[j], dx < 0 ? "next" : "prev");
+    try { localStorage.setItem("mazarus:ui:swiped", "1"); } catch (e) {}
+  }, { passive: true });
+  document.addEventListener("touchcancel", () => { track = false; }, { passive: true });
+  // One-time hint on touch devices
+  let seen = false; try { seen = !!localStorage.getItem("mazarus:ui:swiped"); } catch (e) { seen = true; }
+  if (!seen && matchMedia("(pointer: coarse)").matches) setTimeout(() => {
+    const h = document.createElement("div"); h.className = "swipe-hint"; h.setAttribute("role", "status");
+    h.innerHTML = "<i></i>Swipe left or right to switch tabs";
+    document.body.appendChild(h); setTimeout(() => h.remove(), 3800);
+    try { localStorage.setItem("mazarus:ui:swiped", "1"); } catch (e) {}
+  }, 1500);
+})();
 const ensureDay = d => S.days[d] || (S.days[d] = {});
 const normFocus = day => { day.focus = (day.focus || []).concat([{}, {}, {}]).slice(0, 3).map(f => f || {}); };
 
