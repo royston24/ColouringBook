@@ -288,6 +288,35 @@ table.t td.n { font-family: var(--f-mono); text-align: right; }
 .split .debt .bar i { background: linear-gradient(90deg, var(--amber), #ff9f7a); }
 .split .emergency .bar i { background: linear-gradient(90deg, var(--jade), var(--ice)); }
 .split .invest .bar i { background: linear-gradient(90deg, var(--violet), #c3b6ff); }
+.track-sum { display: grid; grid-template-columns: 72px 1fr; gap: 14px; align-items: center; }
+.track-ring { width: 72px; height: 72px; position: relative; display: grid; place-items: center; }
+.track-ring svg { position: absolute; inset: 0; }
+.track-ring b { position: relative; font-family: var(--f-mono); font-size: 17px; font-weight: 500; }
+.track-ring small { position: absolute; bottom: 14px; font-size: 8.5px; color: var(--ink-3); font-family: var(--f-mono); }
+.areas { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.area { --st: var(--ink-3); position: relative; text-align: left; padding: 13px 13px 12px; border-radius: 16px; background: rgba(8,12,26,.5); border: 1px solid rgba(170,195,255,.09); display: flex; flex-direction: column; gap: 6px; min-width: 0; overflow: hidden; }
+.area::before { content: ""; position: absolute; left: 0; top: 12px; bottom: 12px; width: 2px; border-radius: 2px; background: var(--st); opacity: .9; }
+.area.good { --st: var(--jade); } .area.warn { --st: var(--amber); } .area.bad { --st: var(--bad); } .area.pre { --st: var(--ice); }
+.area .ah { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+.area .ah span { font-family: var(--f-display); font-size: 8.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.area .av { font-family: var(--f-mono); font-size: 19px; font-weight: 500; line-height: 1.15; font-variant-numeric: tabular-nums; }
+.area .av small { font-size: 11px; color: var(--ink-3); font-weight: 400; }
+.area .at { font-size: 11px; color: var(--ink-3); line-height: 1.35; }
+.area .bar { height: 4px; }
+.area .bar i { background: var(--st); }
+.area .tgt { position: relative; }
+.area .tgt::after { content: ""; position: absolute; top: -2px; bottom: -2px; width: 2px; left: var(--mark, 100%); background: var(--ink); border-radius: 1px; opacity: .55; }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: var(--st, var(--ink-3)); flex: none; }
+.good .dot, .dot.good { background: var(--jade); } .warn .dot, .dot.warn { background: var(--amber); } .bad .dot, .dot.bad { background: var(--bad); } .dot.pre { background: var(--ice); } .dot.none { background: var(--ink-3); }
+.strip { display: flex; gap: 6px; flex-wrap: wrap; }
+.strip span { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--edge); font-size: 11px; color: var(--ink-2); }
+.ms { display: grid; grid-template-columns: 18px 1fr auto; gap: 10px; align-items: center; padding: 9px 0; border-bottom: 1px solid rgba(170,195,255,.06); font-size: 13px; }
+.ms:last-child { border-bottom: 0; }
+.ms .mk { width: 12px; height: 12px; border-radius: 50%; border: 1.5px solid var(--edge-hi); }
+.ms.hit .mk { background: var(--jade); border-color: var(--jade); }
+.ms.miss .mk { border-color: var(--bad); }
+.ms.next .mk { border-color: var(--ice); box-shadow: 0 0 0 3px rgba(139,233,255,.15); }
+.ms .d { font-family: var(--f-mono); font-size: 11px; color: var(--ink-3); white-space: nowrap; }
 .gate { display: grid; grid-template-columns: 28px 1fr auto; gap: 10px; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(170,195,255,.06); }
 .gate:last-child { border-bottom: 0; }
 .gate .g { font-family: var(--f-mono); font-size: 11px; color: var(--ink-3); }
@@ -979,6 +1008,167 @@ function debtSuggest() {
   return `Nothing above 20%: clear the smallest first for a quick win (${small.who}, ${money(num(small.bal))}).`;
 }
 
+/* ---------- On-track engine: plan targets by date vs your numbers ---------- */
+const PLAN_MONTHS = (() => { const a = []; let m = "2026-11"; while (m <= "2028-04") { a.push(m); m = addMonths(m, 1); } return a; })();
+const endOf = ym => { const [y, m] = ym.split("-").map(Number); return iso(new Date(y, m, 0)); };
+function incTarget(ym) {
+  if (ym <= "2026-11") return 3000;
+  if (ym <= "2027-03") return 3500;
+  if (ym <= "2027-09") { const i = PLAN_MONTHS.indexOf(ym) - PLAN_MONTHS.indexOf("2027-04"); return Math.round(5000 + i * 300); } // $5k → $6.5k
+  if (ym <= "2028-01") return 8000;
+  return 9000;
+}
+// Linear "where you should be today" between dated milestones
+function interp(pts, d) {
+  if (!pts.length) return null;
+  if (d <= pts[0].date) return pts[0].v;
+  for (let i = 1; i < pts.length; i++) if (d <= pts[i].date) { const a = pts[i - 1], b = pts[i]; return a.v + (b.v - a.v) * diffDays(a.date, d) / Math.max(1, diffDays(a.date, b.date)); }
+  return pts[pts.length - 1].v;
+}
+const fmtShort = d => `${MONTHS[+d.slice(5, 7) - 1]} ’${d.slice(2, 4)}`;
+function statusOf(cur, tgt) {
+  if (cur === null || cur === undefined) return "none";
+  if (!tgt || tgt <= 0) return "good";
+  const r = cur / tgt; return r >= 1 ? "good" : r >= .75 ? "warn" : "bad";
+}
+const ST_LABEL = { good: "On track", warn: "Close", bad: "Behind", none: "Needs data", pre: "Not started" };
+const salary = () => num(S.state.settings.salary);
+function snapVal(k) { const s = latestSnap(); return s && s[k] !== undefined && s[k] !== "" ? num(s[k]) : null; }
+function milestoneRows(list, cur, t) {
+  let nextSet = false;
+  return list.map(m => {
+    const past = m.date < t, hit = m.hit !== undefined ? m.hit : (cur !== null && m.v != null && cur >= m.v);
+    let cls = hit ? "hit" : past ? "miss" : !nextSet ? (nextSet = true, "next") : "";
+    return { ...m, cls };
+  });
+}
+function trackAreas() {
+  const t = todayISO(), ym = monthOf(t), e = E(), pre = t < PLAN_START;
+  const byMonth = incomeByMonth();
+  const A = [];
+
+  // Income: last 3 complete plan months vs their targets; pace inside the first month
+  const full = PLAN_MONTHS.filter(m => m < ym).slice(-3);
+  let incCur = null, incTgt = incTarget(ym < "2026-11" ? "2026-11" : ym), incNote;
+  if (full.length) { incCur = full.reduce((a, m) => a + (byMonth[m] || 0), 0) / full.length; incTgt = full.reduce((a, m) => a + incTarget(m), 0) / full.length; incNote = `${full.length}-month avg · target ${kmoney(incTgt)}`; }
+  else if (!pre) { const dim = +endOf(ym).slice(8), dom = +t.slice(8); incCur = byMonth[ym] || 0; incTgt = incTarget(ym) * dom / dim; incNote = `This month · pace target ${kmoney(incTgt)}`; }
+  A.push({ id: "income", name: "Income", cur: incCur, tgt: incTgt, status: pre ? "pre" : statusOf(incCur, incTgt),
+    value: incCur === null ? kmoney(byMonth[ym] || 0) : kmoney(incCur), unit: full.length ? "/mo" : "",
+    note: pre ? "Nov target: $3–4k collected" : incNote,
+    final: "$9–12k a month, 3-month avg ≥ $8k from Jan ’28",
+    miles: [
+      { label: "Nov: $3–4k collected", date: "2026-11-30", hit: (byMonth["2026-11"] || 0) >= 3000 },
+      { label: "Dec–Mar: average ≥ $3.5k", date: "2027-03-31", hit: ["2026-12", "2027-01", "2027-02", "2027-03"].every(m => m < ym) && ["2026-12", "2027-01", "2027-02", "2027-03"].reduce((a, m) => a + (byMonth[m] || 0), 0) / 4 >= 3500 },
+      { label: "Two months at $6.5k+", date: "2027-09-30", hit: PLAN_MONTHS.some((m, i) => i && (byMonth[m] || 0) >= 6500 && (byMonth[PLAN_MONTHS[i - 1]] || 0) >= 6500) },
+      { label: "3-month average ≥ $8k", date: "2028-01-31", hit: PLAN_MONTHS.some((m, i) => i >= 2 && (byMonth[m] || 0) + (byMonth[PLAN_MONTHS[i - 1]] || 0) + (byMonth[PLAN_MONTHS[i - 2]] || 0) >= 24000) },
+      { label: "$9k+ for 3 months", date: "2028-04-30", hit: PLAN_MONTHS.some((m, i) => i >= 2 && [m, PLAN_MONTHS[i - 1], PLAN_MONTHS[i - 2]].every(x => (byMonth[x] || 0) >= 9000)) }
+    ], cta: ["receipt", "Log a receipt"] });
+
+  // Emergency fund (saved)
+  const em = snapVal("emergency");
+  const emPts = [{ date: "2026-11-01", v: 0 }, { date: "2026-11-30", v: 500 }, { date: "2027-01-31", v: 1000 }];
+  if (e) emPts.push({ date: "2027-03-31", v: e }, { date: "2027-09-30", v: 3 * e }, { date: "2028-01-31", v: 3.5 * e }, { date: "2028-04-30", v: 4 * e });
+  const emTgt = interp(emPts, t);
+  A.push({ id: "emergency", name: "Savings", cur: em, tgt: emTgt, status: pre && em === null ? "pre" : statusOf(em, emTgt),
+    value: em === null ? "—" : kmoney(em), unit: em !== null && e ? ` · ${(em / e).toFixed(1)} mo` : "",
+    note: em === null ? "Enter your Emergency pot balance" : `Emergency fund · should be ~${kmoney(emTgt || 0)} by today`,
+    final: e ? `4+ months of essentials (${kmoney(4 * e)}) by Apr ’28` : "4+ months of essentials by Apr ’28 (finish “My Numbers”)",
+    miles: [
+      { label: "$500", date: "2026-11-30", v: 500 }, { label: "$1,000", date: "2027-01-31", v: 1000 },
+      { label: "1 month of essentials" + (e ? ` (${kmoney(e)})` : ""), date: "2027-03-31", v: e || null },
+      { label: "3 months" + (e ? ` (${kmoney(3 * e)})` : ""), date: "2027-09-30", v: e ? 3 * e : null },
+      { label: "3.5 months" + (e ? ` (${kmoney(3.5 * e)})` : ""), date: "2028-01-31", v: e ? 3.5 * e : null },
+      { label: "4+ months" + (e ? ` (${kmoney(4 * e)})` : ""), date: "2028-04-30", v: e ? 4 * e : null }
+    ], cta: ["balances", "Update balances"] });
+
+  // Debt cleared
+  const startDebt = num(S.state.settings.startDebt), debtLeft = snapVal("debt");
+  const cleared = startDebt && debtLeft !== null ? Math.max(0, Math.min(1, 1 - debtLeft / startDebt)) * 100 : null;
+  const dPts = [{ date: "2027-01-31", v: 0 }, { date: "2027-07-31", v: 25 }, { date: "2027-12-31", v: 50 }, { date: "2028-03-31", v: 75 }];
+  const dTgt = interp(dPts, t);
+  A.push({ id: "debt", name: "Debt cleared", cur: cleared, tgt: dTgt, status: cleared === null ? (pre ? "pre" : "none") : dTgt <= 0 ? "good" : statusOf(cleared, dTgt),
+    value: cleared === null ? "—" : Math.round(cleared) + "%", unit: debtLeft !== null ? ` · ${kmoney(debtLeft)} left` : "",
+    note: cleared === null ? (startDebt ? "Enter debt remaining" : "Finish the debt inventory") : dTgt > 0 ? `Should be ~${Math.round(dTgt)}% by today` : "Minimums on autopilot; Debt #1 by Jan",
+    final: "75% cleared by Mar ’28, final path dated",
+    miles: [
+      { label: "Debt inventory done", date: "2026-11-30", hit: done("p0g0i1") },
+      { label: "Debt #1 named", date: "2027-01-31", hit: done("p1g1i2") },
+      { label: "First debt cleared", date: "2027-05-31", hit: done("p2g0i1") },
+      { label: "25% cleared", date: "2027-07-31", v: 25 }, { label: "50% cleared; highest-rate gone", date: "2027-12-31", v: 50 }, { label: "75% cleared", date: "2028-03-31", v: 75 }
+    ], cta: ["balances", "Update balances"] });
+
+  // Giving
+  const p = phaseFor(t), yr = t.slice(0, 4);
+  const incYTD = S.state.receipts.filter(r => r.date.slice(0, 4) === yr).reduce((a, r) => a + num(r.amount), 0);
+  const giveYTD = S.state.receipts.filter(r => r.date.slice(0, 4) === yr).reduce((a, r) => a + num((r.alloc || {}).give), 0);
+  const giveRate = incYTD ? giveYTD / incYTD * 100 : null;
+  A.push({ id: "giving", name: "Giving", cur: giveRate, tgt: ALLOC[p.n].give, status: pre ? "pre" : giveRate === null ? "none" : statusOf(giveRate, ALLOC[p.n].give * .98),
+    value: kmoney(giveYTD), unit: giveRate !== null ? ` · ${giveRate.toFixed(1)}%` : "",
+    note: `Plan rate now: ${ALLOC[p.n].give}% of every receipt`,
+    final: "10% of receipts from Oct ’27, plus one planned gift",
+    miles: [
+      { label: "Restart at 5%", date: "2026-11-30", hit: done("p0g2i3") }, { label: "Step up to 7%", date: "2027-04-30", hit: done("p2g0i2") },
+      { label: "Giving at 10%", date: "2027-10-31", hit: done("p3g0i0") }, { label: "One planned gift beyond the tithe", date: "2027-12-31", hit: done("p3g2i0") }
+    ], cta: ["receipt", "Log a receipt"] });
+
+  // Investing (learning first, money after gates)
+  const inv = snapVal("invest");
+  const due = [["2026-12-31", 0], ["2027-02-28", 1], ["2027-06-30", 2], ["2027-08-31", 3], ["2027-10-31", 4], ["2028-01-31", 5], ["2028-04-30", 6]];
+  const modsDue = due.filter(([d]) => d < t).length, modsDone = ACADEMY.filter((_, i) => done("mod" + i)).length;
+  const gts = gates(), green = [gts.g1, gts.g2, gts.g3].filter(Boolean).length;
+  const investPhase = t >= "2028-01-01";
+  A.push({ id: "invest", name: "Invested", cur: investPhase ? inv : modsDone, tgt: investPhase ? 50 : modsDue,
+    status: pre ? "pre" : investPhase ? (inv ? "good" : green === 3 ? "warn" : "bad") : (modsDone >= modsDue ? "good" : modsDone >= modsDue - 1 ? "warn" : "bad"),
+    value: inv === null ? "$0" : kmoney(inv), unit: ` · gates ${green}/3`,
+    note: investPhase ? "First $50–100/mo auto-debit if gates are green" : `Student phase · academy ${modsDone}/${ACADEMY.length} (${modsDue} due)`,
+    final: "Small automatic monthly investment running, gates green",
+    miles: [
+      { label: "Post-mortem of past loss", date: "2026-12-31", hit: done("mod0") }, { label: "IPS v0 signed", date: "2027-02-28", hit: done("p1g2i2") },
+      { label: "$10k paper portfolio", date: "2027-08-31", hit: done("mod3") }, { label: "IPS v1 written", date: "2027-10-31", hit: done("p3g0i2") },
+      { label: "Gates 1–3 green", date: "2027-12-31", hit: green === 3 }, { label: "First real investment", date: "2028-01-31", hit: done("p3g3i0") || !!inv }
+    ], cta: ["balances", "Update balances"] });
+
+  // Hub buffer (salary safety)
+  const hub = snapVal("hub"), sal = salary();
+  const hPts = sal ? [{ date: "2026-12-01", v: 0 }, { date: "2027-03-31", v: sal }, { date: "2027-08-31", v: sal }, { date: "2027-09-30", v: 2 * sal }] : [];
+  const hTgt = sal ? interp(hPts, t) : null;
+  A.push({ id: "hub", name: "Hub buffer", cur: hub, tgt: hTgt, status: !sal ? (pre ? "pre" : "none") : t < "2026-12-01" ? "pre" : statusOf(hub, hTgt),
+    value: hub === null ? "—" : kmoney(hub), unit: hub !== null && sal ? ` · ${(hub / sal).toFixed(1)}× salary` : "",
+    note: !sal ? "Set your fixed monthly salary below" : `Should be ~${kmoney(hTgt || 0)} by today`,
+    final: "2 months of salary held from Sep ’27",
+    miles: [{ label: "1 month of salary", date: "2027-03-31", v: sal || null }, { label: "2 months of salary", date: "2027-09-30", v: sal ? 2 * sal : null }], cta: ["balances", "Update balances"] });
+
+  // Income mix: recurring share and biggest client (last 3 months incl. this one)
+  const win = [addMonths(ym, -2), addMonths(ym, -1), ym];
+  const rs = S.state.receipts.filter(r => win.includes(monthOf(r.date)));
+  const tot = rs.reduce((a, r) => a + num(r.amount), 0);
+  const recIds = new Set(streams().filter(x => x.recurring).map(x => x.id));
+  const rec = tot ? rs.filter(r => recIds.has(r.streamId)).reduce((a, r) => a + num(r.amount), 0) / tot * 100 : null;
+  const byClient = {}; rs.forEach(r => { const k = (r.client || "").trim().toLowerCase(); if (k) byClient[k] = (byClient[k] || 0) + num(r.amount); });
+  const topC = tot && Object.keys(byClient).length ? Math.max(...Object.values(byClient)) / tot * 100 : null;
+  const mixLive = t >= "2027-04-01";
+  const recTgt = interp([{ date: "2027-04-01", v: 30 }, { date: "2027-09-30", v: 60 }], t);
+  A.push({ id: "mix", name: "Income mix", cur: rec, tgt: recTgt,
+    status: rec === null ? (pre ? "pre" : "none") : !mixLive ? "pre" : (rec >= recTgt && (topC === null || topC <= 30)) ? "good" : rec >= recTgt * .75 ? "warn" : "bad",
+    value: rec === null ? "—" : Math.round(rec) + "%", unit: " recurring",
+    note: topC === null ? "Mark recurring streams; add “From” on receipts" : `Biggest client ${Math.round(topC)}% (limit 30%)`,
+    final: "≥ 60% recurring, no client above 30%",
+    miles: [{ label: "≥ 60% recurring", date: "2027-09-30", hit: rec !== null && rec >= 60 }, { label: "No client above 30%", date: "2027-09-30", hit: topC !== null && topC <= 30 }], cta: ["streams", "Mark recurring streams"] });
+
+  // Spending vs essentials (from the daily log)
+  const last30 = []; for (let i = 1; i <= 30; i++) last30.push(addDays(t, -i));
+  const logged = last30.filter(d => S.days[d] && String(S.days[d].spend ?? "").trim() !== "");
+  const spend = logged.reduce((a, d) => a + num(S.days[d].spend), 0);
+  const proj = logged.length ? spend / logged.length * 30 : null;
+  A.push({ id: "spend", name: "Spending", cur: proj, tgt: e || null,
+    status: logged.length < 5 || !e ? (pre ? "pre" : "none") : proj <= e ? "good" : proj <= e * 1.1 ? "warn" : "bad",
+    value: proj === null ? "—" : kmoney(proj), unit: proj === null ? "" : "/mo pace",
+    note: !e ? "Needs your essentials (E)" : logged.length < 5 ? `Log spend daily (${logged.length}/5 days)` : `vs essentials ${kmoney(e)} · ${logged.length} days logged`,
+    final: "Live within essentials; salary covers E + minimums",
+    miles: [], cta: ["today", "Log today"], invert: true });
+  return A;
+}
+
 /* ---------- Income streams (yours only; none built in) ---------- */
 const streams = () => S.state.streams || (S.state.streams = []);
 function addStream(name) {
@@ -1146,7 +1336,14 @@ function renderToday() {
     <p class="vcopy">Scripture quotations taken from The Holy Bible, New International Version® NIV®. Copyright © 1973, 1978, 1984, 2011 by Biblica, Inc.™ Used by permission. All rights reserved worldwide.</p>
   </section>`;
 
+  const ta = trackAreas(), tc = ta.filter(a => ["good", "warn", "bad"].includes(a.status));
+  const trackStrip = `<button class="mod neutral" data-act="gotrack" style="display:block;width:100%;text-align:left;padding:13px 16px">
+    <div class="row between"><span class="label">On track</span><span class="mono small">${tc.filter(a => a.status === "good").length}/${tc.length} ${I.arrow.replace("<svg", '<svg width="12" height="12" style="vertical-align:-2px"')}</span></div>
+    <div class="strip" style="margin-top:9px">${ta.map(a => `<span><i class="dot ${a.status}"></i>${esc(a.name.split(" · ")[0])}</span>`).join("")}</div>
+  </button>`;
+
   return `${pilotCard()}
+    ${trackStrip}
     ${verseCard}
     ${alerts.join("")}
     <div class="section-title">Daily ops</div>
@@ -1326,24 +1523,44 @@ function renderMoney() {
   const bars = months.map(m => `<div class="b ${m === ym ? "now" : ""}"><span>${byMonth[m] ? kmoney(byMonth[m]) : ""}</span><i style="height:${((byMonth[m] || 0) / maxV * 78).toFixed(1)}%"></i><span>${MONTHS[+m.slice(5) - 1]}</span></div>`).join("");
   const recent = S.state.receipts.slice().sort((a, b) => b.date.localeCompare(a.date)).slice(0, 8);
 
-  return `<section class="mod money">${modHead(I.sweep, "Sweep a receipt", `Tax, Giving, Emergency and Debt out first; the rest is salary. Sector ${p.n} split.`, `<span class="pill xp">+25</span>`)}
+  const areas = trackAreas();
+  const counted = areas.filter(a => ["good", "warn", "bad"].includes(a.status));
+  const onTrack = counted.filter(a => a.status === "good").length;
+  const rr = 30, rc = 2 * Math.PI * rr, frac = counted.length ? onTrack / counted.length : 0;
+  const summary = t < PLAN_START ? "The plan starts 1 Nov. Targets switch on as each date arrives." : !counted.length ? "Add your numbers to see where you stand." : onTrack === counted.length ? "Every area with data is on track. Keep going." : `${counted.length - onTrack} area${counted.length - onTrack === 1 ? "" : "s"} to watch: ${counted.filter(a => a.status !== "good").map(a => a.name.split(" · ")[0]).join(", ")}.`;
+  const areaCard = a => {
+    const pct = a.tgt && a.cur !== null ? Math.max(0, Math.min(1, a.cur / a.tgt)) : 0;
+    return `<button class="area ${a.status}" data-act="track" data-id="${a.id}">
+      <div class="ah"><span>${esc(a.name)}</span><i class="dot ${a.status}" title="${ST_LABEL[a.status]}"></i></div>
+      <div class="av">${esc(a.value)}<small>${esc(a.unit || "")}</small></div>
+      <div class="bar"><i style="width:${(pct * 100).toFixed(0)}%"></i></div>
+      <div class="at">${esc(a.note)}</div>
+    </button>`;
+  };
+  const overview = `<section class="mod neutral" id="overview">${modHead(I.target, "Am I on track?", "Where the plan says you should be today, area by area. Tap one for its milestones.")}
+    <div class="mod-b stack" style="gap:14px">
+      <div class="track-sum">
+        <div class="track-ring"><svg viewBox="0 0 72 72" aria-hidden="true"><circle cx="36" cy="36" r="${rr}" fill="none" stroke="rgba(170,195,255,.12)" stroke-width="5"/><circle cx="36" cy="36" r="${rr}" fill="none" stroke="${frac === 1 ? "#6ff0c0" : "url(#hg)"}" stroke-width="5" stroke-linecap="round" stroke-dasharray="${rc.toFixed(2)}" stroke-dashoffset="${(rc * (1 - frac)).toFixed(2)}" transform="rotate(-90 36 36)"/></svg><b>${onTrack}/${counted.length}</b><small>ON TRACK</small></div>
+        <div class="stack" style="gap:6px"><p style="font-size:14px">${esc(summary)}</p><div class="strip"><span><i class="dot good"></i>On track</span><span><i class="dot warn"></i>Close</span><span><i class="dot bad"></i>Behind</span><span><i class="dot none"></i>Needs data</span></div></div>
+      </div>
+      <div class="areas">${areas.map(areaCard).join("")}</div>
+    </div>
+    <div class="mod-f"><span class="small dim">By Apr 2028: $9–12k/mo · 4+ months saved · 75% debt cleared · 10% giving · first investment</span></div>
+  </section>`;
+
+  return `${overview}
+  <section class="mod money">${modHead(I.sweep, "Sweep a receipt", `Tax, Giving, Emergency and Debt out first; the rest is salary. Sector ${p.n} split.`, `<span class="pill xp">+25</span>`)}
     <div class="mod-b"><button class="btn primary block" data-act="receipt">${I.coin} Log a receipt</button></div></section>
 
-  <section class="mod neutral">${modHead(I.pulse, "Five numbers", "Your dashboard. Under 5 minutes to keep current.")}
-    <div class="mod-b"><div class="tiles">
-      <div class="tile wide"><div class="row between"><span class="label">Income · ${esc(fmtMonth(ym))}</span>${thisMonth >= p.income[0] ? `<span class="pill done">on target</span>` : ""}</div>
-        <div class="v">${money(thisMonth)}</div><div class="s">3-month avg ${money(Math.round(a3))} · target ${kmoney(p.income[0])}–${kmoney(p.income[1])}</div><div class="bars">${bars}</div></div>
-      <div class="tile"><span class="label">Emergency</span><div class="v">${em === null ? "—" : e ? (em / e).toFixed(1) + '<span class="small dim"> mo</span>' : money(em)}</div><div class="s">${em === null ? "Add balances below" : `Shield ${sh.lv ? sh.tiers[sh.lv - 1][0] : "offline"}${sh.next ? ` · next ${sh.next[2]}` : ""}`}</div></div>
-      <div class="tile"><span class="label">Debt left</span><div class="v">${debtLeft === null ? "—" : kmoney(debtLeft)}</div><div class="s">${cleared === null ? (startDebt ? "Add balances below" : "Finish the debt inventory") : `${Math.round(cleared * 100)}% cleared · ${marker.pct}% by ${MONTHS[+marker.date.slice(5, 7) - 1]} ’${marker.date.slice(2, 4)}`}</div></div>
-      <div class="tile"><span class="label">Giving</span><div class="v">${money(Math.round(giveMTD))}</div><div class="s">${ALLOC[p.n].give}% · YTD ${money(Math.round(giveYTD))}</div></div>
-      <div class="tile"><span class="label">Net worth</span><div class="v">${snap.net !== undefined && snap.net !== "" ? kmoney(num(snap.net)) : "—"}</div><div class="s">${snap.date ? "as of " + esc(fmtDay(snap.date)) : "Negative at the start is fine"}</div></div>
-    </div></div></section>
+  <section class="mod neutral">${modHead(I.pulse, "Income trend", `${esc(fmtMonth(ym))}: ${money(thisMonth)} · 3-month avg ${money(Math.round(a3))}`, thisMonth >= p.income[0] ? `<span class="pill done">on target</span>` : "")}
+    <div class="mod-b"><div class="bars">${bars}</div><p class="small dim" style="margin-top:8px">Sector ${p.n} target ${kmoney(p.income[0])}–${kmoney(p.income[1])} a month · Net worth ${snap.net !== undefined && snap.net !== "" ? kmoney(num(snap.net)) : "not entered"}${snap.date ? " (as of " + esc(fmtDay(snap.date)) + ")" : ""}</p></div></section>
 
-  <section class="mod money">${modHead(I.ledger, "Update balances", "Do this at each Sunday debrief", `<span class="pill xp">+15</span>`)}
+  <section class="mod money" id="balances-mod">${modHead(I.ledger, "Update balances", "Do this at each Sunday debrief", `<span class="pill xp">+15</span>`)}
     <div class="mod-b"><div class="grid2">
       <label class="field"><span>Emergency pot</span><div class="money"><input id="b-emergency" inputmode="decimal" value="${esc(snap.emergency ?? "")}" placeholder="0"></div></label>
       <label class="field"><span>Debt remaining</span><div class="money"><input id="b-debt" inputmode="decimal" value="${esc(snap.debt ?? "")}" placeholder="0"></div></label>
       <label class="field"><span>Hub buffer</span><div class="money"><input id="b-hub" inputmode="decimal" value="${esc(snap.hub ?? "")}" placeholder="0"></div></label>
+      <label class="field"><span>Invested</span><div class="money"><input id="b-invest" inputmode="decimal" value="${esc(snap.invest ?? "")}" placeholder="0"></div></label>
       <label class="field"><span>Net worth</span><div class="money"><input id="b-net" inputmode="text" value="${esc(snap.net ?? "")}" placeholder="-25000"></div></label>
     </div></div>
     <div class="mod-f"><span class="small dim">${S.state.snaps.length} updates</span><button class="btn sm primary" data-act="snap">Save balances</button></div></section>
@@ -1360,10 +1577,10 @@ function renderMoney() {
       ${streams().length ? `<div>${streams().map(st => {
         const rs = S.state.receipts.filter(r => r.streamId === st.id);
         const tot = rs.reduce((a, r) => a + num(r.amount), 0), mtd = rs.filter(r => monthOf(r.date) === ym).reduce((a, r) => a + num(r.amount), 0);
-        return `<div class="list-row"><span class="grow" style="min-width:0"><span style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(st.name)}</span><span class="dim small mono">${rs.length} receipt${rs.length === 1 ? "" : "s"} · ${esc(MONTHS[+ym.slice(5) - 1])} ${money(mtd)}</span></span><span class="mono">${money(tot)}</span><button class="x" data-act="delstream" data-id="${esc(st.id)}" aria-label="Delete stream ${esc(st.name)}">✕</button></div>`;
+        return `<div class="list-row" style="grid-template-columns:1fr auto auto auto"><span class="grow" style="min-width:0"><span style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(st.name)}</span><span class="dim small mono">${rs.length} receipt${rs.length === 1 ? "" : "s"} · ${esc(MONTHS[+ym.slice(5) - 1])} ${money(mtd)}</span></span><button class="chip" style="min-height:28px;padding:0 10px;font-size:11px" aria-pressed="${!!st.recurring}" data-act="streamrec" data-id="${esc(st.id)}">${st.recurring ? "Recurring" : "One-off"}</button><span class="mono">${money(tot)}</span><button class="x" data-act="delstream" data-id="${esc(st.id)}" aria-label="Delete stream ${esc(st.name)}">✕</button></div>`;
       }).join("")}</div>` : `<p class="small dim">No streams yet. Add one here or while logging a receipt.</p>`}
       <div class="row"><input id="newstream" placeholder="New stream name" maxlength="40" style="flex:1"><button class="btn sm" data-act="addstream">${I.plus} Add</button></div>
-      ${streams().length ? `<p class="small dim">Deleting a stream keeps its past receipts and their label.</p>` : ""}
+      ${streams().length ? `<p class="small dim">Tap Recurring / One-off to mark retainers and other repeat income. Deleting a stream keeps its past receipts and their label.</p>` : ""}
     </div></section>
 
   <section class="mod neutral">${modHead(I.coin, "Recent receipts", `${S.state.receipts.length} logged`)}
@@ -1373,6 +1590,7 @@ function renderMoney() {
     <div class="mod-b stack" style="gap:12px">
       <label class="field"><span>Monthly essentials (E)</span><div class="money"><input id="s-essentials" inputmode="decimal" data-set="essentials" value="${esc(S.state.settings.essentials || "")}" placeholder="From “My Numbers”"></div></label>
       <label class="field"><span>Starting total debt</span><div class="money"><input id="s-startDebt" inputmode="decimal" data-set="startDebt" value="${esc(S.state.settings.startDebt || "")}" placeholder="From the debt inventory"></div></label>
+      <label class="field"><span>Fixed monthly salary (paid from the Hub on the 1st)</span><div class="money"><input id="s-salary" inputmode="decimal" data-set="salary" value="${esc(S.state.settings.salary || "")}" placeholder="Set at your lowest realistic month"></div></label>
       <label class="field"><span>Accountability partner</span><input id="s-partner" data-set="partner" value="${esc(S.state.settings.partner || "")}" placeholder="Church friend"></label>
       <div class="row wrap" style="gap:8px"><button class="btn sm ghost" data-act="export">Save a backup</button><label class="btn sm ghost" for="importfile" style="cursor:pointer">Restore backup</label><input id="importfile" type="file" accept="application/json,.json" hidden></div>
       <p class="small dim">${S.backend.kind === "db" ? "Saved privately to your account. Only you can see these entries." : "Saved on this device only. Use backups to move between devices."} Education and structure, not licensed advice.</p>
@@ -1702,6 +1920,33 @@ function receiptSheet() {
   });
 }
 
+function trackSheet(id) {
+  const a = trackAreas().find(x => x.id === id); if (!a) return;
+  const t = todayISO();
+  const rows = milestoneRows(a.miles, a.cur, t);
+  const pct = a.tgt && a.cur !== null ? Math.max(0, Math.min(1, a.cur / a.tgt)) : 0;
+  openSheet(`<div class="stack">
+    ${sheetHead("On track · " + esc(fmtDay(t)), esc(a.name), `<span class="pill ${a.status === "good" ? "done" : a.status === "bad" ? "bad" : a.status === "warn" ? "xp" : ""}">${ST_LABEL[a.status]}</span>`)}
+    <div class="area ${a.status}" style="pointer-events:none">
+      <div class="av" style="font-size:24px">${esc(a.value)}<small>${esc(a.unit || "")}</small></div>
+      <div class="bar"><i style="width:${(pct * 100).toFixed(0)}%"></i></div>
+      <div class="at" style="font-size:12.5px">${esc(a.note)}</div>
+    </div>
+    <div class="brief"><b style="color:var(--ink);font-weight:500">18-month goal:</b> ${esc(a.final)}</div>
+    ${rows.length ? `<div><span class="label">Milestones</span><div style="margin-top:6px">${rows.map(m => `<div class="ms ${m.cls}"><span class="mk"></span><span>${esc(m.label)}</span><span class="d">${m.cls === "hit" ? "done" : esc(fmtShort(m.date))}</span></div>`).join("")}</div></div>` : ""}
+    <p class="small dim">Green ring: reached · blue: next · red: date passed without it. Dates are targets; the gates are the rule.</p>
+    <button class="btn primary" id="t-go">${esc(a.cta[1])}</button>
+  </div>`, bg => {
+    bg.querySelector("#t-go").onclick = () => {
+      closeSheet(true);
+      const k = a.cta[0];
+      if (k === "receipt") receiptSheet();
+      else if (k === "today") setTab("today");
+      else { setTab("money"); setTimeout(() => { const el = document.getElementById(k === "streams" ? "streams-mod" : "balances-mod"); el && el.scrollIntoView({ behavior: "smooth", block: "center" }); }, 60); }
+    };
+  });
+}
+
 function stoneSheet(n) {
   const s = STONES[n - 1], laid = S.state.stones[n];
   openSheet(`<div class="stack">
@@ -1807,10 +2052,13 @@ document.addEventListener("click", async ev => {
     }
     case "snap": {
       const v = id => document.getElementById(id).value.trim();
-      S.state.snaps.push({ date: t, emergency: v("b-emergency"), debt: v("b-debt"), hub: v("b-hub"), net: v("b-net") });
+      S.state.snaps.push({ date: t, emergency: v("b-emergency"), debt: v("b-debt"), hub: v("b-hub"), invest: v("b-invest"), net: v("b-net") });
       if (S.state.snaps.length > 400) S.state.snaps = S.state.snaps.slice(-400);
       saveState(0); render(); award(before, "Balances saved"); break;
     }
+    case "streamrec": { const st = streams().find(x => x.id === el.dataset.id); if (st) { st.recurring = !st.recurring; saveState(0); render(); } break; }
+    case "track": trackSheet(el.dataset.id); break;
+    case "gotrack": setTab("money"); setTimeout(() => { const o = document.getElementById("overview"); o && o.scrollIntoView({ behavior: "smooth", block: "start" }); }, 50); break;
     case "addstream": {
       const inp = document.getElementById("newstream");
       const st = addStream(inp.value);
