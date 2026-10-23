@@ -623,7 +623,6 @@ const ALLOC = [
   { give: 10, tax: 15, salary: 42,   debt: 15, emergency: 8,    invest: 10 }
 ];
 const BUCKETS = [["give", "Give"], ["tax", "Tax"], ["salary", "Salary"], ["debt", "Debt extra"], ["emergency", "Emergency"], ["invest", "Invest"]];
-const STREAMS = ["Engine A · Hyper", "Engine B · Applied AI", "FLIGHT", "Studio Jasero", "Other"];
 const DEBT_MARKERS = [{ date: "2027-07-31", pct: 25 }, { date: "2027-12-31", pct: 50 }, { date: "2028-03-31", pct: 75 }];
 const STONES = [
   ["Day Zero", "Nov 2026"], ["Giving restarted", "Nov 2026"], ["First month tracked; $500 saved", "Nov–Dec 2026"],
@@ -738,7 +737,7 @@ function activeGroup(s) {
    STORE — db capability (private per person) with device fallback
    ============================================================ */
 const COLLS = ["days", "reviews", "records"];
-const blankState = () => ({ settings: {}, checks: {}, receipts: [], snaps: [], stones: {}, gates: {} });
+const blankState = () => ({ settings: {}, checks: {}, receipts: [], snaps: [], stones: {}, gates: {}, streams: [] });
 const S = { state: blankState(), days: {}, reviews: {}, records: {}, backend: null, base: null, pending: {}, ready: false };
 const clone = o => JSON.parse(JSON.stringify(o || {}));
 
@@ -961,6 +960,20 @@ function debtSuggest() {
   const small = rows.slice().sort((a, b) => num(a.bal) - num(b.bal))[0];
   return `Nothing above 20%: clear the smallest first for a quick win (${small.who}, ${money(num(small.bal))}).`;
 }
+
+/* ---------- Income streams (yours only; none built in) ---------- */
+const streams = () => S.state.streams || (S.state.streams = []);
+function addStream(name) {
+  name = String(name || "").trim().slice(0, 40);
+  if (!name) return null;
+  const hit = streams().find(x => x.name.toLowerCase() === name.toLowerCase());
+  if (hit) return hit;
+  const st = { id: "s" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), name };
+  streams().push(st); saveState(0);
+  return st;
+}
+function deleteStream(id) { S.state.streams = streams().filter(x => x.id !== id); saveState(0); }
+const streamName = r => (r.streamId && (streams().find(x => x.id === r.streamId) || {}).name) || r.stream || "";
 
 /* ============================================================
    RENDER
@@ -1320,8 +1333,19 @@ function renderMoney() {
       <div class="gate"><span class="g">G3</span><p>3 months where income covers salary, giving, tax, debt, savings</p><button class="chip" aria-pressed="${g.g3}" data-act="gate" data-g="g3">${g.g3 ? "green" : "red"}</button></div>
     </div></section>
 
+  <section class="mod money" id="streams-mod">${modHead(I.signal, "Income streams", "Your own labels for where money comes from", `<span class="pill">${streams().length}</span>`)}
+    <div class="mod-b stack" style="gap:10px">
+      ${streams().length ? `<div>${streams().map(st => {
+        const rs = S.state.receipts.filter(r => r.streamId === st.id);
+        const tot = rs.reduce((a, r) => a + num(r.amount), 0), mtd = rs.filter(r => monthOf(r.date) === ym).reduce((a, r) => a + num(r.amount), 0);
+        return `<div class="list-row"><span class="grow" style="min-width:0"><span style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(st.name)}</span><span class="dim small mono">${rs.length} receipt${rs.length === 1 ? "" : "s"} · ${esc(MONTHS[+ym.slice(5) - 1])} ${money(mtd)}</span></span><span class="mono">${money(tot)}</span><button class="x" data-act="delstream" data-id="${esc(st.id)}" aria-label="Delete stream ${esc(st.name)}">✕</button></div>`;
+      }).join("")}</div>` : `<p class="small dim">No streams yet. Add one here or while logging a receipt.</p>`}
+      <div class="row"><input id="newstream" placeholder="New stream name" maxlength="40" style="flex:1"><button class="btn sm" data-act="addstream">${I.plus} Add</button></div>
+      ${streams().length ? `<p class="small dim">Deleting a stream keeps its past receipts and their label.</p>` : ""}
+    </div></section>
+
   <section class="mod neutral">${modHead(I.coin, "Recent receipts", `${S.state.receipts.length} logged`)}
-    <div class="mod-b">${recent.length ? recent.map(r => `<div class="list-row"><span class="grow" style="min-width:0"><span style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.client || r.stream || "Receipt")}</span><span class="dim small mono">${esc(fmtDay(r.date))} · give ${money(num((r.alloc || {}).give), 2)}</span></span><span class="mono">${money(num(r.amount))}</span><button class="x" data-act="delreceipt" data-id="${esc(r.id)}" aria-label="Delete receipt">✕</button></div>`).join("") : `<p class="small dim">No receipts yet. Your first one unlocks the Sweep Engine.</p>`}</div></section>
+    <div class="mod-b">${recent.length ? recent.map(r => `<div class="list-row"><span class="grow" style="min-width:0"><span style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc([r.client, streamName(r)].filter(Boolean).join(" · ") || "Receipt")}</span><span class="dim small mono">${esc(fmtDay(r.date))} · give ${money(num((r.alloc || {}).give), 2)}</span></span><span class="mono">${money(num(r.amount))}</span><button class="x" data-act="delreceipt" data-id="${esc(r.id)}" aria-label="Delete receipt">✕</button></div>`).join("") : `<p class="small dim">No receipts yet. Your first one unlocks the Sweep Engine.</p>`}</div></section>
 
   <section class="mod neutral">${modHead(I.hub, "Your numbers", "Missions fill these in; edit them here if they change")}
     <div class="mod-b stack" style="gap:12px">
@@ -1598,8 +1622,11 @@ function receiptSheet() {
       <label class="field"><span>Amount received</span><div class="money"><input id="r-amount" inputmode="decimal" placeholder="0"></div></label>
       <label class="field"><span>Date</span><input id="r-date" type="date" value="${t}"></label>
     </div>
-    <label class="field"><span>Client</span><input id="r-client" placeholder="e.g. ACMI retainer"></label>
-    <label class="field"><span>Stream</span><select id="r-stream">${STREAMS.map(s => `<option>${esc(s)}</option>`).join("")}</select></label>
+    <label class="field"><span>From (optional)</span><input id="r-client" placeholder="Who paid"></label>
+    <div class="field"><div class="row between"><span class="small muted">Stream (optional)</span><button type="button" class="btn sm ghost" id="r-edit" style="min-height:26px;padding:0 10px">Edit</button></div>
+      <div class="chips" id="r-streams"></div>
+      <div class="row" id="r-newrow" hidden><input id="r-newname" placeholder="Stream name" maxlength="40" style="flex:1"><button type="button" class="btn sm" id="r-add">Add</button></div>
+    </div>
     <p class="small dim">After direct costs and subcontractors.</p>
     <div class="split" id="r-split"></div>
     <p class="small dim" id="r-note"></p>
@@ -1614,12 +1641,39 @@ function receiptSheet() {
     };
     amt.addEventListener("input", paint); dte.addEventListener("change", paint); paint();
     setTimeout(() => amt.focus(), 50);
+    let sel = null, editing = false;
+    const box = bg.querySelector("#r-streams"), newRow = bg.querySelector("#r-newrow"), newName = bg.querySelector("#r-newname"), editBtn = bg.querySelector("#r-edit");
+    const paintStreams = () => {
+      if (sel && !streams().some(x => x.id === sel)) sel = null;
+      box.innerHTML = streams().map(st => editing
+        ? `<button type="button" class="chip" data-sdel="${esc(st.id)}" aria-label="Delete ${esc(st.name)}">${esc(st.name)} <span style="color:var(--bad)">✕</span></button>`
+        : `<button type="button" class="chip" aria-pressed="${sel === st.id}" data-sid="${esc(st.id)}">${esc(st.name)}</button>`).join("")
+        + (editing ? "" : `<button type="button" class="chip" id="r-new">${I.plus} New stream</button>`)
+        + (!streams().length && !editing ? `<span class="small dim" style="align-self:center">None saved yet</span>` : "");
+      editBtn.hidden = !streams().length && !editing;
+      editBtn.textContent = editing ? "Done" : "Edit";
+    };
+    const addNew = () => { const st = addStream(newName.value); if (!st) { newName.focus(); return; } sel = st.id; newName.value = ""; newRow.hidden = true; paintStreams(); toast(`Stream “${st.name}” saved`); };
+    box.addEventListener("click", ev => {
+      const c = ev.target.closest("[data-sid]");
+      if (c) { sel = sel === c.dataset.sid ? null : c.dataset.sid; paintStreams(); return; }
+      if (ev.target.closest("#r-new")) { newRow.hidden = false; newName.focus(); return; }
+      const d = ev.target.closest("[data-sdel]");
+      if (d) {
+        if (d.dataset.c !== "1") { d.dataset.c = "1"; d.innerHTML = `Delete “${esc((streams().find(x => x.id === d.dataset.sdel) || {}).name || "")}”?`; d.style.borderColor = "var(--bad)"; return; }
+        deleteStream(d.dataset.sdel); paintStreams(); render();
+      }
+    });
+    editBtn.onclick = () => { editing = !editing; newRow.hidden = true; paintStreams(); };
+    bg.querySelector("#r-add").onclick = addNew;
+    newName.addEventListener("keydown", ev => { if (ev.key === "Enter") { ev.preventDefault(); addNew(); } });
+    paintStreams();
     bg.querySelector("#r-save").onclick = () => {
       const a = num(amt.value);
       if (a <= 0) { amt.focus(); toast("Enter the amount that landed"); return; }
       const before = computeXP();
       const date = dte.value || t, { out } = allocate(a, date);
-      S.state.receipts.push({ id: "r" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), date, amount: a, client: bg.querySelector("#r-client").value.trim(), stream: bg.querySelector("#r-stream").value, alloc: out });
+      S.state.receipts.push({ id: "r" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), date, amount: a, client: bg.querySelector("#r-client").value.trim(), streamId: sel, stream: sel ? (streams().find(x => x.id === sel) || {}).name : "", alloc: out });
       saveState(0); closeSheet(); render();
       award(before, `Swept ${money(out.give, 2)} to Giving, ${money(out.tax, 2)} to Tax`);
     };
@@ -1702,6 +1756,16 @@ document.addEventListener("click", async ev => {
       if (S.state.snaps.length > 400) S.state.snaps = S.state.snaps.slice(-400);
       saveState(0); render(); award(before, "Balances saved"); break;
     }
+    case "addstream": {
+      const inp = document.getElementById("newstream");
+      const st = addStream(inp.value);
+      if (!st) { inp.focus(); toast("Type a name for the stream"); break; }
+      render(); toast(`Stream “${st.name}” saved`); break;
+    }
+    case "delstream": {
+      if (el.dataset.confirm !== "1") { el.dataset.confirm = "1"; el.textContent = "Delete?"; el.style.color = "var(--bad)"; setTimeout(() => { if (el.isConnected) { el.dataset.confirm = ""; el.textContent = "✕"; el.style.color = ""; } }, 3000); break; }
+      deleteStream(el.dataset.id); render(); toast("Stream deleted"); break;
+    }
     case "gate": S.state.gates[el.dataset.g] = !S.state.gates[el.dataset.g]; saveState(300); render(); break;
     case "delreceipt": {
       if (el.dataset.confirm !== "1") { el.dataset.confirm = "1"; el.textContent = "Delete?"; el.style.color = "var(--bad)"; setTimeout(() => { if (el.isConnected) { el.dataset.confirm = ""; el.textContent = "✕"; el.style.color = ""; } }, 3000); break; }
@@ -1765,7 +1829,7 @@ document.addEventListener("change", ev => {
   };
   rd.readAsText(f);
 });
-document.addEventListener("keydown", ev => { if (ev.key === "Escape") closeSheet(); });
+document.addEventListener("keydown", ev => { if (ev.key === "Escape") closeSheet(); if (ev.key === "Enter" && ev.target.id === "newstream") { ev.preventDefault(); document.querySelector('[data-act="addstream"]').click(); } });
 let lastToday = todayISO();
 setInterval(() => { const t = todayISO(); if (t !== lastToday) { lastToday = t; softRender(); } }, 60000);
 
