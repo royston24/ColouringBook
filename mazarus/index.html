@@ -309,6 +309,13 @@ table.t td.n { font-family: var(--f-mono); text-align: right; }
 .entry p { font-size: 13.5px; color: var(--ink-2); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .empty { text-align: center; padding: 22px 12px; color: var(--ink-2); font-size: 13.5px; }
 .callout { border-left: 2px solid var(--amber); padding: 2px 0 2px 12px; font-size: 13px; color: var(--ink-2); }
+.mod.scripture { --hue: var(--violet); background: radial-gradient(120% 90% at 0% 0%, rgba(169,150,255,.16), transparent 60%), radial-gradient(90% 80% at 100% 100%, rgba(139,233,255,.10), transparent 60%), rgba(150,175,255,.03); }
+.vq { position: relative; font-size: 17px; line-height: 1.55; font-weight: 300; font-style: italic; text-wrap: pretty; padding-left: 22px; }
+.vq::before { content: "“"; position: absolute; left: -2px; top: -8px; font-family: var(--f-display); font-style: normal; font-size: 30px; line-height: 1; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.vref { display: flex; align-items: center; gap: 10px; margin-top: 12px; padding-left: 22px; }
+.vref b { font-family: var(--f-display); font-size: 10px; letter-spacing: .18em; text-transform: uppercase; font-weight: 400; color: var(--ice); }
+.vapply { margin-top: 12px; padding: 10px 12px; border-radius: 12px; background: rgba(8,12,26,.45); border: 1px solid rgba(170,195,255,.07); font-size: 12.5px; color: var(--ink-2); }
+.vapply b { color: var(--ink); font-weight: 500; }
 details.fold { border-top: 1px solid var(--edge); }
 details.fold:first-child { border-top: 0; }
 details.fold summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center; padding: 12px 0; font-size: 14px; font-weight: 500; }
@@ -625,6 +632,49 @@ const STONES = [
   ["First tiny investment, left alone", "Jan 2028"], ["Three months at $8k+ average", "Jan 2028"], ["The 18-month testimony", "Apr 2028"]
 ];
 const RETREAT_MONTHS = ["2027-03", "2027-09", "2027-11", "2028-03"];
+
+/* Verse of the day (KJV, public domain). Each carries a one-line nudge back to the plan. */
+const VERSES = [
+  ["Luke 16:10", "He that is faithful in that which is least is faithful also in much.", "Small wins count. Finish one mission today."],
+  ["Psalm 24:1", "The earth is the LORD's, and the fulness thereof; the world, and they that dwell therein.", "You're the manager, not the owner. Sweep every receipt."],
+  ["Proverbs 27:23", "Be thou diligent to know the state of thy flocks, and look well to thy herds.", "Know your numbers. Update a balance today."],
+  ["Lamentations 3:22–23", "It is of the LORD's mercies that we are not consumed, because his compassions fail not. They are new every morning: great is thy faithfulness.", "Missed a day? Resume today. Never miss twice."],
+  ["Proverbs 14:23", "In all labour there is profit: but the talk of the lips tendeth only to penury.", "Do the work, then talk about it. One outreach note."],
+  ["Philippians 4:11", "Not that I speak in respect of want: for I have learned, in whatsoever state I am, therewith to be content.", "Name what is already enough today."],
+  ["2 Corinthians 9:11", "Being enriched in every thing to all bountifulness, which causeth through us thanksgiving to God.", "Give first, as a percentage."],
+  ["1 Samuel 7:12", "Hitherto hath the LORD helped us.", "Look back at your Ebenezer stones."],
+  ["Proverbs 21:5", "The thoughts of the diligent tend only to plenteousness; but of every one that is hasty only to want.", "No rushed money moves. 7-day cooling-off."],
+  ["Proverbs 22:7", "The rich ruleth over the poor, and the borrower is servant to the lender.", "No new debt today. Pay minimums on time."],
+  ["Romans 13:8", "Owe no man any thing, but to love one another.", "Every minimum paid is a step toward freedom."],
+  ["Proverbs 3:9", "Honour the LORD with thy substance, and with the firstfruits of all thine increase.", "Giving comes out first, the day money lands."],
+  ["2 Corinthians 9:7", "Every man according as he purposeth in his heart, so let him give; not grudgingly, or of necessity: for God loveth a cheerful giver.", "Give gladly, never from guilt."],
+  ["Proverbs 13:11", "Wealth gotten by vanity shall be diminished: but he that gathereth by labour shall increase.", "Slow and steady beats a quick win. No get-rich schemes."],
+  ["Proverbs 6:6", "Go to the ant, thou sluggard; consider her ways, and be wise.", "Store a little. Every dollar to Emergency counts."],
+  ["Proverbs 16:3", "Commit thy works unto the LORD, and thy thoughts shall be established.", "Pray over today's three before you start."],
+  ["Proverbs 16:9", "A man's heart deviseth his way: but the LORD directeth his steps.", "Plan the week, hold it loosely."],
+  ["Luke 14:28", "For which of you, intending to build a tower, sitteth not down first, and counteth the cost, whether he have sufficient to finish it?", "Count the cost before you take on a new venture."],
+  ["Matthew 6:21", "For where your treasure is, there will your heart be also.", "Where did your money go yesterday? Log it."],
+  ["Matthew 6:33", "But seek ye first the kingdom of God, and his righteousness; and all these things shall be added unto you.", "First things first: faith, family, then the work."],
+  ["Matthew 6:34", "Take therefore no thought for the morrow: for the morrow shall take thought for the things of itself.", "Just today's log. Just today's three."],
+  ["Philippians 4:19", "But my God shall supply all your need according to his riches in glory by Christ Jesus.", "Plan on your lowest month; trust for the rest."],
+  ["Philippians 4:6", "Be careful for nothing; but in every thing by prayer and supplication with thanksgiving let your requests be made known unto God.", "Write one line of gratitude before any worry."],
+  ["Colossians 3:23", "And whatsoever ye do, do it heartily, as to the Lord, and not unto men.", "Do today's client work as an offering."],
+  ["Psalm 127:2", "It is vain for you to rise up early, to sit up late, to eat the bread of sorrows: for so he giveth his beloved sleep.", "Hard stop tonight. Cut a venture before cutting sleep."],
+  ["Exodus 20:9", "Six days shalt thou labour, and do all thy work.", "Protect your rest day this week."],
+  ["Mark 2:27", "The sabbath was made for man, and not man for the sabbath.", "Rest is part of the plan, not a break from it."],
+  ["Ecclesiastes 4:9", "Two are better than one; because they have a good reward for their labour.", "Check in with your wife or your accountability partner."],
+  ["Proverbs 15:22", "Without counsel purposes are disappointed: but in the multitude of counsellors they are established.", "Big calls go to professionals."],
+  ["Hebrews 13:5", "Be content with such things as ye have: for he hath said, I will never leave thee, nor forsake thee.", "Watch for lifestyle creep in good months."],
+  ["1 Timothy 6:6", "But godliness with contentment is great gain.", "Remember your household “enough” figure."],
+  ["Proverbs 30:8", "Give me neither poverty nor riches; feed me with food convenient for me.", "Enough, and more to share."],
+  ["Isaiah 40:31", "But they that wait upon the LORD shall renew their strength; they shall mount up with wings as eagles; they shall run, and not be weary.", "Score your energy honestly today."],
+  ["Psalm 37:5", "Commit thy way unto the LORD; trust also in him; and he shall bring it to pass.", "Hand over the pipeline worries. Do the next action."],
+  ["Proverbs 3:5–6", "Trust in the LORD with all thine heart; and lean not unto thine own understanding. In all thy ways acknowledge him, and he shall direct thy paths.", "Re-read your why on the Compass."],
+  ["Galatians 6:9", "And let us not be weary in well doing: for in due season we shall reap, if we faint not.", "Keep the streak. The harvest is months away."],
+  ["Zechariah 4:10", "For who hath despised the day of small things?", "$500 is a real milestone. Celebrate it."],
+  ["Acts 20:35", "It is more blessed to give than to receive.", "Plan one gift beyond the tithe."]
+];
+function verseFor(d) { return VERSES[((Math.round(parse(d) / 864e5) % VERSES.length) + VERSES.length) % VERSES.length]; }
 
 /* Gear: each piece is earned by a mission and opens the record you wrote. */
 const GEAR = [
@@ -1050,7 +1100,19 @@ function renderToday() {
     dots += `<i class="${cls} ${k === t ? "today" : ""}" title="${esc(fmtDay(k))}"></i>`;
   }
 
+  const [vRef, vText, vNudge] = verseFor(t);
+  const verseCard = `<section class="mod scripture">
+    ${modHead(I.book, "Verse of the day", esc(fmtDay(t)) + " · KJV", `<span class="pill">Sector ${p.n}</span>`)}
+    <div class="mod-b">
+      <p class="vq">${esc(vText)}</p>
+      <div class="vref"><b>${esc(vRef)}</b></div>
+      <div class="vapply"><b>Today:</b> ${esc(vNudge)}</div>
+    </div>
+    <div class="mod-f"><span class="small dim verse" style="font-size:12px">Sector verse: ${esc(p.verse)}</span><button class="btn sm ghost" data-act="journal" data-d="${t}">Reflect in journal</button></div>
+  </section>`;
+
   return `${pilotCard()}
+    ${verseCard}
     ${alerts.join("")}
     <div class="section-title">Daily ops</div>
     ${dailyLog}
