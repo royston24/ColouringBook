@@ -581,8 +581,6 @@ const I = {
    ============================================================ */
 const PLAN_START = "2026-11-01";
 const PLAN_END = "2028-04-30";
-const PAUSE_W1 = ["FaithTales", "Doodlebot", "Speapy", "Fraudar", "New MOE bids", "New FLIGHT features"];
-const PAUSE_LIST = PAUSE_W1.concat(["Makerspace bids", "Upwork profile building"]);
 const note = { k: "note", type: "textarea", label: "Field note (optional)", rows: 2 };
 const M = (t, o = {}) => ({ t, ...o });
 
@@ -594,14 +592,14 @@ const PHASES = [
     income: [3000, 4000], boss: "Shame & Avoidance",
     groups: [
       { label: "Week 1 — See it", from: "2026-11-01", to: "2026-11-07", items: [
-        M("Write your “why” and sign the pause list", { brief: "Five sentences: faith, family, freedom, giving, and why now. Then sign the pause list so the four apps and new bids stay parked until Feb 2028.",
+        M("Write your “why” and sign the pause list", { brief: "Five sentences: faith, family, freedom, giving, and why now. Then list what you're parking until Feb 2028 and sign it.",
           form: [
             { k: "faith", type: "textarea", label: "Faith: why this matters to God", rows: 2, req: 1 },
             { k: "family", type: "textarea", label: "Family: who this is for", rows: 2, req: 1 },
             { k: "freedom", type: "textarea", label: "Freedom: what changes when it's done", rows: 2, req: 1 },
             { k: "giving", type: "textarea", label: "Giving: what generosity looks like", rows: 2, req: 1 },
             { k: "now", type: "textarea", label: "Why now", rows: 2 },
-            { k: "pause", type: "checklist", label: "I'm pausing until Feb 2028", items: PAUSE_W1, req: 1 },
+            { k: "pause", type: "pauselist", label: "What I'm pausing until Feb 2028" },
             { k: "sign", type: "sign", label: "Sign the pause list", req: 1 }
           ]}),
         M("Build your debt inventory", { fx: "debts", brief: "Every lender on one page: balance, rate (or “?” if unknown), minimum and status. Include informal loans and any IRAS or CPF arrears. Totals calculate as you type.",
@@ -743,7 +741,7 @@ const PHASES = [
     goal: "$9–12k a month that survives losing any one client, 75% of debt gone, and the story written.",
     income: [9000, 12000], boss: "Pride",
     groups: [
-      { label: "February", from: "2028-02-01", to: "2028-02-29", items: [M("Evaluate one paused app with real user data", { form: [{ k: "app", type: "text", label: "App", req: 1 }, { k: "data", type: "textarea", label: "What the data says", rows: 3 }, { k: "c", type: "checklist", label: "", items: ["It can earn within 90 days"] }] }), M("Raise retainer ceilings; 1–2 workshops a month; cap Designed for Good hours")] },
+      { label: "February", from: "2028-02-01", to: "2028-02-29", items: [M("Evaluate one paused project with real user data", { form: [{ k: "app", type: "text", label: "Project", req: 1 }, { k: "data", type: "textarea", label: "What the data says", rows: 3 }, { k: "c", type: "checklist", label: "", items: ["It can earn within 90 days"] }] }), M("Raise retainer ceilings; 1–2 workshops a month; cap Designed for Good hours")] },
       { label: "March", from: "2028-03-01", to: "2028-03-31", items: [M("75% of debt cleared; informal debts settled first"), M("Annual tax review with the accountant"), M("Quarterly retreat: draft the next 18-month plan", { form: [{ k: "next", type: "textarea", label: "Next 18 months, in a few lines", rows: 4, req: 1 }, { k: "stop", type: "textarea", label: "New stop list", rows: 2 }] })] },
       { label: "April", from: "2028-04-01", to: "2028-04-30", items: [M("Write the “Mazarus story”", { form: [{ k: "wins", type: "textarea", label: "3 wins", rows: 3, req: 1 }, { k: "str", type: "textarea", label: "3 struggles", rows: 3 }, { k: "les", type: "textarea", label: "3 lessons", rows: 3 }, { k: "c", type: "checklist", label: "Shared with", items: ["My wife", "My accountability partner", "My pastor"] }] }), M("Choose the rhythms to keep for life; no-spend family day", { form: [{ k: "keep", type: "textarea", label: "Rhythms I'm keeping", rows: 3, req: 1 }] })] }
     ],
@@ -899,7 +897,7 @@ function activeGroup(s) {
    STORE — db capability (private per person) with device fallback
    ============================================================ */
 const COLLS = ["days", "reviews", "records"];
-const blankState = () => ({ settings: {}, checks: {}, receipts: [], snaps: [], stones: {}, gates: {}, streams: [] });
+const blankState = () => ({ settings: {}, checks: {}, receipts: [], snaps: [], stones: {}, gates: {}, streams: [], pause: [] });
 const S = { state: blankState(), days: {}, reviews: {}, records: {}, backend: null, base: null, pending: {}, ready: false };
 const clone = o => JSON.parse(JSON.stringify(o || {}));
 
@@ -1284,6 +1282,19 @@ function trackAreas() {
   return A;
 }
 
+/* ---------- Pause list (yours only; none built in) ---------- */
+const pauseList = () => S.state.pause || (S.state.pause = []);
+function addPause(name) {
+  name = String(name || "").trim().slice(0, 60);
+  if (!name || pauseList().some(x => x.name.toLowerCase() === name.toLowerCase())) return false;
+  pauseList().push({ id: "pz" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), name, date: todayISO() });
+  saveState(0); return true;
+}
+function delPause(id) { S.state.pause = pauseList().filter(x => x.id !== id); saveState(0); }
+const pauseRows = (attr) => pauseList().length
+  ? pauseList().map(x => `<div class="list-row" style="grid-template-columns:1fr auto"><span style="min-width:0;overflow-wrap:anywhere">${esc(x.name)}</span><button type="button" class="x" ${attr}="${esc(x.id)}" aria-label="Remove ${esc(x.name)}">✕</button></div>`).join("")
+  : `<p class="pempty">Nothing paused yet</p>`;
+
 /* ---------- Income streams (yours only; none built in) ---------- */
 const streams = () => S.state.streams || (S.state.streams = []);
 function addStream(name) {
@@ -1647,7 +1658,10 @@ function renderPage(pg) {
     case "rules":
       return `${pageHead(["Rules"], "steel")}
         <section class="panel"><span class="plabel">Non-negotiables</span><ol class="plain">${NON_NEGOTIABLES.map(x => `<li>${esc(x)}</li>`).join("")}</ol></section>
-        <section class="panel"><span class="plabel">Paused until Feb 2028</span><div class="chips">${PAUSE_LIST.map(x => `<span class="pill">${esc(x)}</span>`).join("")}</div></section>`;
+        <section class="panel"><div class="row between"><span class="plabel">Paused until Feb 2028</span><span class="mono small dim">${pauseList().length}</span></div>
+          <div>${pauseRows("data-act=\"pausedel\" data-id")}</div>
+          <div class="row"><input id="pauseinput" placeholder="Add something to pause" maxlength="60" style="flex:1"><button class="btn sm" data-act="pauseadd">${I.plus} Add</button></div>
+          <p class="small dim">Revisit with real data in Feb 2028. Revive only what can earn within 90 days.</p></section>`;
     case "stones": {
       const laid = Object.keys(S.state.stones).length;
       return `${pageHead(["Ebenezer", "Stones"], "sunset", `${vpill(laid, 12)}${laid}/12`)}
@@ -1789,6 +1803,9 @@ function fieldHtml(f, v) {
       const o = v || {};
       return `<div class="field" data-f="${f.k}">${lab}<div>${f.items.map((it, i) => `<button type="button" class="ck" role="checkbox" aria-checked="${o[i] ? "true" : "false"}" data-ck="${f.k}" data-i="${i}"><span class="tick" aria-checked="${o[i] ? "true" : "false"}">${I.check}</span><span>${esc(it)}</span></button>`).join("")}</div></div>`;
     }
+    case "pauselist":
+      return `<div class="field" data-f="${f.k}">${lab}<div>${pauseRows("data-pdel")}</div>
+        <div class="row"><input data-pinput placeholder="Add a project, venture or habit" maxlength="60" style="flex:1"><button type="button" class="btn sm" data-padd>${I.plus} Add</button></div></div>`;
     case "lines": {
       const arr = Array.isArray(v) ? v : [];
       return `<div class="field" data-f="${f.k}">${lab}<div class="stack" style="gap:8px">${Array.from({ length: f.n }, (_, i) => `<div class="row"><span class="mono small dim" style="width:16px">${i + 1}</span><input data-lk="${f.k}" data-i="${i}" value="${esc(arr[i] || "")}" placeholder="Name"></div>`).join("")}</div></div>`;
@@ -1825,6 +1842,7 @@ function collect(root, form, draft) {
   return draft;
 }
 function filled(f, v) {
+  if (f.type === "pauselist") return pauseList().length > 0;
   if (f.type === "checklist") return f.items.every((_, i) => (v || {})[i]);
   if (f.type === "lines") return (v || []).some(Boolean);
   if (f.type === "table") return (v || []).some(r => r[f.cols[0].k]);
@@ -1885,9 +1903,13 @@ function missionSheet(id) {
     fm.addEventListener("input", paintTotals);
     fm.addEventListener("change", paintTotals);
     fm.addEventListener("submit", ev => ev.preventDefault());
+    fm.addEventListener("keydown", ev => { if (ev.key === "Enter" && ev.target.matches("[data-pinput]")) { ev.preventDefault(); fm.querySelector("[data-padd]").click(); } });
     fm.addEventListener("click", ev => {
       const ck = ev.target.closest("[data-ck]");
       if (ck) { const o = draft[ck.dataset.ck] || (draft[ck.dataset.ck] = {}); o[ck.dataset.i] = !o[ck.dataset.i]; const on = o[ck.dataset.i] ? "true" : "false"; ck.setAttribute("aria-checked", on); ck.querySelector(".tick").setAttribute("aria-checked", on); return; }
+      if (ev.target.closest("[data-padd]")) { collect(fm, m.form, draft); const inp = fm.querySelector("[data-pinput]"); if (addPause(inp.value)) { rerenderForm(); fm.querySelector("[data-pinput]").focus(); } else inp.focus(); return; }
+      const pd = ev.target.closest("[data-pdel]");
+      if (pd) { collect(fm, m.form, draft); delPause(pd.dataset.pdel); rerenderForm(); return; }
       const add = ev.target.closest("[data-addrow]");
       if (add) { collect(fm, m.form, draft); (draft[add.dataset.addrow] = draft[add.dataset.addrow] || []).push({}); rerenderForm(); const rows = fm.querySelectorAll(`[data-table="${add.dataset.addrow}"] [data-row]`); const inp = rows[rows.length - 1] && rows[rows.length - 1].querySelector("input"); inp && inp.focus(); return; }
       const del = ev.target.closest("[data-delrow]");
@@ -1938,6 +1960,7 @@ function recordView(m, rec) {
     let body;
     if (f.type === "checklist") { const on = f.items.filter((_, i) => (v || {})[i]); if (!on.length) return ""; body = esc(on.join(" · ")); }
     else if (!filled(f, v)) return "";
+    else if (f.type === "pauselist") body = esc(pauseList().map(x => x.name).join(" · "));
     else if (f.type === "lines") body = esc((v || []).filter(Boolean).join(", "));
     else if (f.type === "table") {
       const rows = (v || []).filter(r => r[f.cols[0].k]);
@@ -2221,6 +2244,11 @@ document.addEventListener("click", async ev => {
     }
     case "streamrec": { const st = streams().find(x => x.id === el.dataset.id); if (st) { st.recurring = !st.recurring; saveState(0); render(); } break; }
     case "track": trackSheet(el.dataset.id); break;
+    case "pauseadd": { const inp = document.getElementById("pauseinput"); if (addPause(inp.value)) { render(); document.getElementById("pauseinput").focus(); } else { inp.focus(); toast(inp.value.trim() ? "Already on the list" : "Type something to pause"); } break; }
+    case "pausedel": {
+      if (el.dataset.confirm !== "1") { el.dataset.confirm = "1"; el.textContent = "Remove?"; el.style.color = "var(--bad)"; setTimeout(() => { if (el.isConnected) { el.dataset.confirm = ""; el.textContent = "✕"; el.style.color = ""; } }, 3000); break; }
+      delPause(el.dataset.id); render(); break;
+    }
     case "addstream": {
       const inp = document.getElementById("newstream");
       const st = addStream(inp.value);
@@ -2294,7 +2322,7 @@ document.addEventListener("change", ev => {
   };
   rd.readAsText(f);
 });
-document.addEventListener("keydown", ev => { if (ev.key === "Escape") { if (document.getElementById("sheet")) closeSheet(); else if (UI.page) closePage(); } if (ev.key === "Enter" && ev.target.id === "newstream") { ev.preventDefault(); document.querySelector('[data-act="addstream"]').click(); } });
+document.addEventListener("keydown", ev => { if (ev.key === "Escape") { if (document.getElementById("sheet")) closeSheet(); else if (UI.page) closePage(); } if (ev.key === "Enter" && ev.target.id === "pauseinput") { ev.preventDefault(); document.querySelector('[data-act="pauseadd"]').click(); } if (ev.key === "Enter" && ev.target.id === "newstream") { ev.preventDefault(); document.querySelector('[data-act="addstream"]').click(); } });
 let lastToday = todayISO();
 setInterval(() => { const t = todayISO(); if (t !== lastToday) { lastToday = t; softRender(); } }, 60000);
 
