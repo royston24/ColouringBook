@@ -3,7 +3,7 @@
 <meta name="theme-color" content="#05070d">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Michroma&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
 /* Layout: a 480px HUD column over a slow nebula. Each module is a boxed console with its own category hue;
    five tabs (Today · Map · Gear · Journal · Money) in a fixed glass dock. */
@@ -25,6 +25,7 @@
   --grad: linear-gradient(120deg, var(--ice), var(--violet) 55%, var(--rose));
   --f-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
   --f-body: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --f-head: "Michroma", "Eurostile", "Archivo", sans-serif;
   --f-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
   --r: 18px;
   --r-sm: 11px;
@@ -482,6 +483,23 @@ details.cdone[open] summary::after { content: "–"; }
 .btn.big { min-height: 54px; font-size: 15px; }
 .fine { font-size: 9.5px; line-height: 1.45; color: var(--ink-3); text-align: center; padding: 6px 12px 0; }
 .vsector { text-decoration: none; display: block; color: var(--ink-2); }
+
+/* Headers use the sci-fi face; body and verse stay in Archivo */
+.brand, .label, .plabel, .section-title, .mod-t b, .rank, .area .ah span, details.cdone summary { font-family: var(--f-head); font-weight: 400; font-stretch: normal; }
+.brand { font-size: 11.5px; letter-spacing: .28em; }
+.label, .plabel, details.cdone summary { font-size: 9.5px; letter-spacing: .2em; }
+.area .ah span { font-size: 8.5px; letter-spacing: .14em; }
+.greet h2 { font-family: var(--f-head); font-weight: 400; font-size: 24px; letter-spacing: .01em; line-height: 1.2; }
+.greet h2 em { font-family: var(--f-body); font-size: 22px; }
+.tile2 .t2-title { font-family: var(--f-head); font-weight: 400; font-size: 25px; line-height: 1.18; letter-spacing: .01em; overflow-wrap: anywhere; }
+.tile2.half .t2-title { font-size: 15.5px; letter-spacing: .02em; line-height: 1.25; }
+.tile2 .t2-top { font-family: var(--f-head); font-weight: 400; font-size: 9px; letter-spacing: .2em; }
+.ptitle { font-family: var(--f-head); font-weight: 400; font-size: 28px; line-height: 1.18; letter-spacing: .01em; overflow-wrap: anywhere; }
+.hh b { font-family: var(--f-head); font-weight: 400; font-size: 18px; letter-spacing: .04em; margin-bottom: 4px; }
+.hv-f { font-family: var(--f-head); font-weight: 400; font-size: 10px; letter-spacing: .18em; }
+.lv-rank { font-family: var(--f-head); font-weight: 400; font-size: 15px; letter-spacing: .06em; }
+.lv-n small { font-family: var(--f-head); font-weight: 400; font-size: 7.5px; letter-spacing: .18em; }
+.qbtn { font-family: var(--f-head); font-weight: 400; font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; gap: 10px; }
 .screen { animation: rise .35s ease both; }
 @keyframes rise { from { transform: translateY(6px); } to { transform: none; } }
 .screen.in-next { animation: inNext .28s ease both; }
@@ -1416,7 +1434,6 @@ function renderToday() {
   const { p, gi } = activeGroup(t), g = p.groups[gi], gm = g.items, gDone = gm.filter(m => done(m.id)).length;
   const focus = (day.focus || []).concat([{}, {}, {}]).slice(0, 3).map(f => f || {}), fDone = focus.filter(f => f.done && f.t).length;
   const ta = trackAreas(), tc = ta.filter(a => ["good", "warn", "bad"].includes(a.status)), tOn = tc.filter(a => a.status === "good").length;
-  const L = levelInfo(computeXP());
   const [vRef, vCode, vText] = verseFor(t);
   const fs = vText.length < 60 ? 34 : vText.length < 100 ? 28 : vText.length < 140 ? 24 : 21;
 
@@ -1430,7 +1447,7 @@ function renderToday() {
   if (RETREAT_MONTHS.includes(monthOf(t))) notes.push(`<span class="chip"><i class="dot pre"></i>Retreat month</span>`);
 
   const hero = `<section class="hero2 rib" style="--g:${G.verse}">
-    <div class="hh"><div><b>Today</b><span>${DAYS[dt.getDay()]}, ${MONTHS[dt.getMonth()]} ${dt.getDate()}</span></div><button class="avatar" data-act="page" data-k="pilot" aria-label="Level ${L.level}, open your profile">${hexBadge(L)}</button></div>
+    <div class="hh"><div><b>Today</b><span>${DAYS[dt.getDay()]}, ${MONTHS[dt.getMonth()]} ${dt.getDate()}</span></div></div>
     <a class="hv" href="${youversion(vCode)}" target="_blank" rel="noopener" aria-label="Open ${esc(vRef)} in YouVersion">
       <p class="hv-t" style="font-size:${fs}px">${esc(vText)}</p>
       <span class="hv-f"><span>${esc(vRef)} · NIV</span><span class="hv-go">${I.arrow}</span></span>
