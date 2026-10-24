@@ -3,7 +3,7 @@
 <meta name="theme-color" content="#05070d">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Michroma&family=Sora:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
 /* Layout: a 480px HUD column over a slow nebula. Each module is a boxed console with its own category hue;
    five tabs (Today · Map · Gear · Journal · Money) in a fixed glass dock. */
@@ -23,8 +23,8 @@
   --jade: #6ff0c0;
   --bad: #ff7d8f;
   --grad: linear-gradient(120deg, var(--ice), var(--violet) 55%, var(--rose));
-  --f-display: "Michroma", "Eurostile", "Arial Black", sans-serif;
-  --f-body: "Sora", "Segoe UI", system-ui, sans-serif;
+  --f-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --f-body: "Archivo", "Helvetica Neue", Arial, sans-serif;
   --f-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
   --r: 18px;
   --r-sm: 11px;
@@ -34,7 +34,7 @@
 html { background: var(--void); }
 body {
   background: var(--void); color: var(--ink); font-family: var(--f-body);
-  font-size: 15px; line-height: 1.5; font-weight: 300; -webkit-font-smoothing: antialiased;
+  font-size: 15px; line-height: 1.5; font-weight: 400; -webkit-font-smoothing: antialiased;
   min-height: 100%; overflow-x: hidden;
 }
 body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: rgba(5,7,13,.9); }
@@ -58,7 +58,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
   display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-block: 14px 12px;
   background: linear-gradient(to bottom, rgba(5,7,13,.94) 60%, rgba(5,7,13,0));
 }
-.brand { font-family: var(--f-display); font-size: 11.5px; letter-spacing: .28em; text-transform: uppercase; }
+.brand { font-family: var(--f-display); font-size: 12px; font-weight: 600; font-stretch: 125%; letter-spacing: .24em; text-transform: uppercase; }
 .brand b { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; font-weight: 400; }
 .sync { font-family: var(--f-mono); font-size: 10.5px; color: var(--ink-3); display: flex; align-items: center; gap: 6px; }
 .sync::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--ink-3); }
@@ -80,7 +80,7 @@ p { margin: 0; }
 .small { font-size: 12.5px; }
 .mono { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
 .verse { font-style: italic; color: var(--ink-2); font-size: 13px; }
-.label { font-family: var(--f-display); font-size: 9.5px; letter-spacing: .22em; text-transform: uppercase; color: var(--ink-2); }
+.label { font-family: var(--f-display); font-size: 10px; font-weight: 600; font-stretch: 120%; letter-spacing: .18em; text-transform: uppercase; color: var(--ink-2); }
 .section-title { font-family: var(--f-display); font-size: 10px; letter-spacing: .26em; text-transform: uppercase; color: var(--ink-3); padding: 8px 2px 0; display: flex; align-items: center; gap: 10px; }
 .section-title::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, var(--edge), transparent); }
 
@@ -364,7 +364,7 @@ ol.plain { margin: 0; padding-left: 18px; display: flex; flex-direction: column;
 /* Dock */
 .tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 25; padding-left: max(12px, env(safe-area-inset-left, 0px)); padding-right: max(12px, env(safe-area-inset-right, 0px)); padding-block: 8px calc(10px + env(safe-area-inset-bottom, 0px)); background: linear-gradient(to top, rgba(5,7,13,.97) 55%, rgba(5,7,13,0)); }
 .tabs nav { max-width: 456px; margin: 0 auto; display: grid; grid-template-columns: repeat(5, 1fr); background: rgba(16,22,44,.65); border: 1px solid var(--edge); border-radius: 22px; padding: 5px; backdrop-filter: blur(22px) saturate(150%); -webkit-backdrop-filter: blur(22px) saturate(150%); }
-.tabs button { position: relative; border: 0; background: transparent; border-radius: 17px; min-height: 54px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--ink-3); font-family: var(--f-display); font-size: 8px; letter-spacing: .12em; text-transform: uppercase; }
+.tabs button { position: relative; border: 0; background: transparent; border-radius: 17px; min-height: 54px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--ink-3); font-family: var(--f-display); font-size: 10.5px; font-weight: 500; letter-spacing: .02em; }
 .tabs button svg { width: 19px; height: 19px; }
 .tabs button[aria-current="page"] { color: var(--ink); background: rgba(139,233,255,.09); }
 .tabs button[aria-current="page"] svg { color: var(--ice); filter: drop-shadow(0 0 6px rgba(139,233,255,.6)); }
@@ -385,13 +385,92 @@ ol.plain { margin: 0; padding-left: 18px; display: flex; flex-direction: column;
 .levelup small { display: block; font-family: var(--f-display); font-size: 9.5px; letter-spacing: .3em; color: var(--amber); }
 .levelup b { display: block; font-family: var(--f-display); font-size: 26px; margin-top: 8px; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; font-weight: 400; }
 @keyframes pop { 0% { opacity: 0; transform: translate(-50%, -45%) scale(.9); } 12% { opacity: 1; transform: translate(-50%, -50%) scale(1); } 80% { opacity: 1; } 100% { opacity: 0; } }
+
+/* ---------- Tiles, hero and pages (ribbed glass gradients) ---------- */
+.rib { position: relative; isolation: isolate; overflow: hidden; background: var(--g); color: #fff; }
+.rib::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: repeating-linear-gradient(90deg, rgba(255,255,255,.16) 0 1px, rgba(255,255,255,0) 1px 3px, rgba(0,0,0,.10) 3px 4px); mix-blend-mode: overlay; -webkit-mask-image: radial-gradient(65% 75% at 68% 58%, #000 35%, transparent 75%); mask-image: radial-gradient(65% 75% at 68% 58%, #000 35%, transparent 75%); }
+.rib::after { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: .22; mix-blend-mode: overlay; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .6 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+.greet { display: flex; flex-direction: column; gap: 2px; padding: 8px 2px 0; }
+.greet span { font-size: 13px; color: var(--ink-2); }
+.greet h2 { font-size: 32px; font-weight: 700; letter-spacing: -.025em; line-height: 1.05; }
+.greet h2 em { font-style: normal; font-weight: 400; color: var(--ink-3); }
+.tiles2 { display: flex; flex-direction: column; gap: 12px; }
+.duo { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.duo > * { min-width: 0; }
+.tile2 { display: flex; flex-direction: column; justify-content: space-between; gap: 18px; min-height: 184px; padding: 20px; border: 0; border-radius: 30px; text-align: left; width: 100%; font: inherit; box-shadow: 0 22px 44px -26px rgba(0,0,0,.85); text-shadow: 0 1px 16px rgba(0,0,0,.16); transition: transform .15s; }
+.tile2:active { transform: scale(.985); }
+.tile2 .t2-top { display: flex; gap: 6px; align-items: center; font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; opacity: .9; }
+.tile2 .t2-top .dot { width: 8px; height: 8px; box-shadow: 0 0 0 1.5px rgba(255,255,255,.7); }
+.tile2 .t2-title { font-size: 34px; font-weight: 700; line-height: 1; letter-spacing: -.03em; }
+.tile2.half { min-height: 160px; padding: 16px; border-radius: 26px; gap: 14px; }
+.tile2.half .t2-title { font-size: 23px; letter-spacing: -.02em; }
+.tile2.dim { filter: saturate(.25) brightness(.62); }
+.tile2.dim .t2-btn { background: rgba(255,255,255,.2); color: #fff; }
+.t2-foot { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; }
+.t2-count { display: flex; align-items: center; gap: 10px; font-size: 24px; font-weight: 600; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.half .t2-count { font-size: 19px; gap: 8px; }
+.t2-count small { font-size: 12px; font-weight: 400; opacity: .85; align-self: flex-end; padding-bottom: 3px; margin-left: -4px; }
+.vpill { width: 11px; height: 28px; border-radius: 6px; border: 1.5px solid rgba(255,255,255,.92); position: relative; flex: none; }
+.half .vpill { height: 22px; width: 10px; }
+.vpill i { position: absolute; left: 2px; right: 2px; bottom: 2px; border-radius: 3px; background: #fff; }
+.t2-btn { width: 54px; height: 54px; border-radius: 50%; display: grid; place-items: center; background: rgba(255,255,255,.92); color: #0b1020; flex: none; box-shadow: 0 8px 22px -8px rgba(0,0,0,.45); }
+.half .t2-btn { width: 40px; height: 40px; }
+.t2-btn svg { width: 20px; height: 20px; }
+.half .t2-btn svg { width: 16px; height: 16px; }
+
+.hero2 { border-radius: 32px; padding: 18px 20px 0; display: flex; flex-direction: column; box-shadow: 0 26px 50px -28px rgba(224,74,154,.6); }
+.hh { display: flex; justify-content: space-between; align-items: center; padding-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,.38); }
+.hh b { display: block; font-size: 22px; font-weight: 700; letter-spacing: -.01em; line-height: 1.1; }
+.hh span { font-size: 13px; opacity: .88; }
+.avatar { width: 50px; height: 50px; border-radius: 50%; border: 0; padding: 0; background: rgba(255,255,255,.18); display: grid; place-items: center; }
+.avatar .hex { width: 40px; height: 40px; }
+.avatar .hex b { font-size: 14px; font-weight: 700; color: #fff; }
+.avatar .hex small { display: none; }
+.avatar .hx0 { fill: rgba(255,255,255,.12); stroke: rgba(255,255,255,.4); }
+.avatar .hx1 { stroke: #fff; }
+.hv { display: block; color: #fff; text-decoration: none; padding: 24px 0 20px; }
+.hv-t { font-weight: 300; text-transform: uppercase; line-height: 1.08; letter-spacing: 0; font-stretch: 100%; text-wrap: pretty; }
+.hv-f { display: flex; justify-content: space-between; align-items: center; margin-top: 22px; font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; }
+.hv-go { width: 58px; height: 40px; border-radius: 999px; background: #fff; color: #0b1020; display: grid; place-items: center; flex: none; }
+.hv-go svg { width: 20px; height: 20px; }
+.hcells { display: grid; grid-template-columns: 1fr 1fr; margin: 0 -20px; border-top: 1px solid rgba(255,255,255,.38); }
+.hcells button { background: none; border: 0; color: #fff; min-height: 56px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; font-weight: 500; }
+.hcells button + button { border-left: 1px solid rgba(255,255,255,.38); }
+.hcells svg { width: 16px; height: 16px; }
+.chip .dot { width: 7px; height: 7px; }
+
+.phead { border-radius: 32px; padding: 16px 20px 22px; display: flex; flex-direction: column; justify-content: space-between; gap: 30px; min-height: 210px; }
+.pbtn { width: 42px; height: 42px; border-radius: 50%; border: 0; background: rgba(255,255,255,.9); color: #0b1020; display: grid; place-items: center; flex: none; }
+.pbtn.sm { width: 32px; height: 32px; background: rgba(255,255,255,.25); color: #fff; }
+.pbtn svg { width: 18px; height: 18px; }
+.ptitle { font-size: 40px; font-weight: 700; letter-spacing: -.03em; line-height: 1; }
+.phead .chip { color: #fff; border-color: rgba(255,255,255,.55); }
+.phead .chip[aria-pressed="true"] { background: #fff; color: #0b1020; }
+.panel { border-radius: 24px; background: rgba(150,175,255,.045); border: 1px solid var(--edge); padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.plabel { font-size: 11px; font-weight: 600; font-stretch: 115%; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-3); }
+.clist { display: flex; flex-direction: column; }
+.crow { display: grid; grid-template-columns: 26px 1fr auto; gap: 14px; align-items: center; padding: 13px 0; background: none; border: 0; border-bottom: 1px solid rgba(170,195,255,.07); text-align: left; width: 100%; font-size: 15px; line-height: 1.35; color: var(--ink); }
+.crow:last-child { border-bottom: 0; }
+.circ { width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid var(--edge-hi); display: grid; place-items: center; }
+.circ svg { width: 12px; height: 12px; }
+.crow.done .circ { background: rgba(230,236,255,.85); border-color: transparent; }
+.crow.done .ct { color: var(--ink-3); text-decoration: line-through; text-decoration-color: rgba(155,166,198,.5); }
+.cg { color: var(--ink-3); display: grid; } .cg svg { width: 15px; height: 15px; }
+details.cdone summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center; padding: 6px 0 2px; font-size: 11px; font-weight: 600; font-stretch: 115%; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-3); }
+details.cdone summary::-webkit-details-marker { display: none; }
+details.cdone summary::after { content: "+"; font-family: var(--f-mono); }
+details.cdone[open] summary::after { content: "–"; }
+.pempty { color: var(--ink-3); font-size: 13px; padding: 4px 0; }
+.btn.big { min-height: 54px; font-size: 15px; }
+.fine { font-size: 9.5px; line-height: 1.45; color: var(--ink-3); text-align: center; padding: 6px 12px 0; }
+.vsector { text-decoration: none; display: block; color: var(--ink-2); }
 .screen { animation: rise .35s ease both; }
 @keyframes rise { from { transform: translateY(6px); } to { transform: none; } }
 .screen.in-next { animation: inNext .28s ease both; }
 .screen.in-prev { animation: inPrev .28s ease both; }
 @keyframes inNext { from { transform: translateX(28px); opacity: .4; } to { transform: none; opacity: 1; } }
 @keyframes inPrev { from { transform: translateX(-28px); opacity: .4; } to { transform: none; opacity: 1; } }
-#main { touch-action: pan-y; }
+#main { touch-action: pan-y; overflow-x: clip; }
 .swipe-hint { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(96px + env(safe-area-inset-bottom, 0px)); z-index: 60; display: flex; align-items: center; gap: 10px; padding: 9px 16px; border-radius: 999px; background: rgba(20,28,56,.95); border: 1px solid var(--edge-hi); font-size: 12.5px; color: var(--ink-2); white-space: nowrap; }
 .swipe-hint i { width: 18px; height: 2px; border-radius: 1px; background: var(--grad); animation: nudge 1.2s ease-in-out infinite alternate; }
 @keyframes nudge { from { transform: translateX(-6px); } to { transform: translateX(6px); } }
@@ -1184,13 +1263,26 @@ function deleteStream(id) { S.state.streams = streams().filter(x => x.id !== id)
 const streamName = r => (r.streamId && (streams().find(x => x.id === r.streamId) || {}).name) || r.stream || "";
 
 /* ============================================================
-   RENDER
+   RENDER — each tab is a few tiles; a tile opens its page
    ============================================================ */
 const main = () => document.getElementById("main");
 let deferredRender = false;
 const isTyping = () => { const a = document.activeElement; return a && /INPUT|TEXTAREA|SELECT/.test(a.tagName); };
 function softRender() { if (document.getElementById("sheet") || isTyping()) { deferredRender = true; return; } render(); }
 document.addEventListener("focusout", () => { if (deferredRender) setTimeout(() => { if (!document.getElementById("sheet") && !isTyping()) { deferredRender = false; render(); } }, 60); });
+
+/* Mesh gradients for tiles (ribbed glass + grain are layered in CSS) */
+const G = {
+  verse: "radial-gradient(90% 70% at 0% 0%, #b14dff 0%, transparent 60%), radial-gradient(80% 70% at 100% 100%, #ffa23a 0%, transparent 62%), linear-gradient(165deg, #e04a9a 0%, #ff7a52 100%)",
+  ice: "radial-gradient(55% 55% at 68% 58%, #2f1fd6 0 22%, transparent 70%), radial-gradient(80% 80% at 8% 6%, #39d8ff, transparent 60%), linear-gradient(150deg, #0a6cff, #1fb8ff)",
+  sunset: "radial-gradient(60% 55% at 78% 30%, #ff2e7e, transparent 62%), radial-gradient(70% 70% at 12% 92%, #ffb03a, transparent 60%), linear-gradient(140deg, #9b44ff, #ff7f3f)",
+  violet: "radial-gradient(60% 60% at 82% 18%, #ff69d2, transparent 60%), radial-gradient(80% 80% at 8% 95%, #3a2bff, transparent 60%), linear-gradient(160deg, #6f35ff, #2a1690)",
+  jade: "radial-gradient(60% 60% at 85% 85%, #0088b8, transparent 62%), radial-gradient(70% 60% at 90% 10%, #8affc8, transparent 55%), linear-gradient(150deg, #0e9f7a, #0b6f8f)",
+  ember: "radial-gradient(60% 60% at 82% 25%, #ffd65e, transparent 60%), radial-gradient(80% 80% at 8% 95%, #ff4a3d, transparent 60%), linear-gradient(150deg, #f0852a, #e8483a)",
+  rose: "radial-gradient(60% 60% at 80% 75%, #7a2bff, transparent 62%), radial-gradient(70% 70% at 10% 10%, #ff8fc7, transparent 60%), linear-gradient(150deg, #e0407f, #8f2bb8)",
+  steel: "radial-gradient(70% 70% at 75% 25%, #4256a8, transparent 62%), radial-gradient(70% 70% at 10% 95%, #1d6c8f, transparent 60%), linear-gradient(160deg, #1c2550, #0e1430)"
+};
+const SECTOR_G = ["ice", "jade", "ember", "violet", "sunset"];
 
 function render() {
   if (!S.ready) return;
@@ -1200,7 +1292,7 @@ function render() {
     const old = b.querySelector(".badge"); if (old) old.remove();
     if (b.dataset.tab === "journal" && due && UI.tab !== "journal") b.insertAdjacentHTML("beforeend", '<i class="badge"></i>');
   });
-  const html = { today: renderToday, map: renderMap, gear: renderGear, journal: renderJournal, money: renderMoney }[UI.tab]();
+  const html = UI.page ? renderPage(UI.page) : { today: renderToday, map: renderMap, gear: renderGear, journal: renderJournal, money: renderMoney }[UI.tab]();
   main().innerHTML = `<div class="screen stack ${UI.enter ? "in-" + UI.enter : ""}">${html}</div>`;
   UI.enter = null;
 }
@@ -1209,29 +1301,10 @@ const modHead = (icon, title, sub, right = "") => `<div class="mod-h"><div class
 function hexBadge(L) {
   const pct = L.into / L.need;
   return `<div class="hex"><svg viewBox="0 0 64 64" aria-hidden="true">
-    <polygon points="32,3 57,17.5 57,46.5 32,61 7,46.5 7,17.5" fill="rgba(139,233,255,.06)" stroke="rgba(170,195,255,.18)" stroke-width="1.5"/>
-    <polygon points="32,3 57,17.5 57,46.5 32,61 7,46.5 7,17.5" fill="none" stroke="url(#hg)" stroke-width="2.5" stroke-linejoin="round" pathLength="100" stroke-dasharray="${Math.max(.01, pct * 100).toFixed(2)} 100"/></svg>
+    <polygon class="hx0" points="32,3 57,17.5 57,46.5 32,61 7,46.5 7,17.5" fill="rgba(139,233,255,.06)" stroke="rgba(170,195,255,.18)" stroke-width="1.5"/>
+    <polygon class="hx1" points="32,3 57,17.5 57,46.5 32,61 7,46.5 7,17.5" fill="none" stroke="url(#hg)" stroke-width="2.5" stroke-linejoin="round" pathLength="100" stroke-dasharray="${Math.max(.01, pct * 100).toFixed(2)} 100"/></svg>
     <b>${L.level}</b><small>LVL</small></div>`;
 }
-function pilotCard() {
-  const L = levelInfo(computeXP());
-  const t = todayISO(), p = phaseFor(t), st = streak();
-  const dayTxt = t < PLAN_START ? `T−${diffDays(t, PLAN_START)}` : t > PLAN_END ? "Done" : `${diffDays(PLAN_START, t) + 1}`;
-  return `<section class="mod neutral pilot">
-    ${hexBadge(L)}
-    <div class="stack" style="gap:6px;min-width:0">
-      <div class="row between"><span class="rank">${esc(L.rank)}</span><span class="mono small dim">${L.xp.toLocaleString()} XP</span></div>
-      <div class="bar"><i style="width:${(L.into / L.need * 100).toFixed(1)}%"></i></div>
-      <span class="small dim">${(L.need - L.into).toLocaleString()} XP to level ${L.level + 1} · Sector ${p.n} ${esc(p.name)}</span>
-    </div>
-    <div class="stats">
-      <div class="stat"><b>${dayTxt}</b><span>${t < PLAN_START ? "days to launch" : `day of ${TOTAL_DAYS}`}</span></div>
-      <div class="stat"><b>${st.n}</b><span>day streak${st.grace ? " · 1 miss" : ""}</span></div>
-      <div class="stat"><b>${GEAR.filter(gearUnlocked).length}/12</b><span>gear equipped</span></div>
-    </div>
-  </section>`;
-}
-
 function missionRow(m, sub) {
   const isDone = done(m.id);
   const gear = m.gear ? GEAR.find(g => g.id === m.gear) : null;
@@ -1251,109 +1324,90 @@ function dueRituals() {
   return out;
 }
 
-/* ---------- TODAY ---------- */
-function renderToday() {
-  const t = todayISO();
-  const day = S.days[t] || {};
-  const steps = dayLogSteps(day);
-  const logDone = day.rest || steps.every(Boolean);
-  const { p, gi } = activeGroup(t);
-  const g = p.groups[gi], gm = g.items;
-  const gDone = gm.filter(m => done(m.id)).length;
-
-  const alerts = [];
-  const lastLogged = Object.keys(S.days).filter(k => k < t && dayLogged(k)).sort().pop();
-  if (lastLogged && diffDays(lastLogged, t) > 5) alerts.push(`<div class="mod ritual">${modHead(I.alert, "Signal lost", `${diffDays(lastLogged, t) - 1} days since your last log. Call ${esc(S.state.settings.partner || "your accountability partner")} today.`)}</div>`);
-  else if (lastLogged && !dayLogged(addDays(t, -1)) && !dayLogged(t)) alerts.push(`<div class="mod ritual">${modHead(I.alert, "Missed yesterday", "Miss once, resume; never miss twice. Today's log keeps your streak alive.")}</div>`);
-  const due = dueRituals();
-  if (due.includes("week")) alerts.push(`<div class="mod ritual">${modHead(I.cal, "Sunday debrief", "30 min: receipts, sweeps, pipeline, one money action.", `<button class="btn sm primary" data-act="goweek">Start</button>`)}</div>`);
-  if (due.includes("month")) { const prev = addMonths(monthOf(t), -1); alerts.push(`<div class="mod ritual">${modHead(I.heart, "Money date due", `Reflect on ${fmtMonth(prev)}. Your wife joins the last 20 min.`, `<button class="btn sm primary" data-act="gomonth" data-m="${prev}">Open</button>`)}</div>`); }
-  if (RETREAT_MONTHS.includes(monthOf(t))) alerts.push(`<div class="mod ritual">${modHead(I.star, "Quarterly retreat", "This month. Half day: review, salary, pause list, prayer.")}</div>`);
-
-  const energy = [1, 2, 3, 4, 5].map(n => `<button class="chip" aria-pressed="${day.energy === n}" data-act="energy" data-n="${n}">${n}</button>`).join("");
-  const stepNum = (ok, n) => `<span class="num">${ok ? I.check : n}</span>`;
-  const dailyLog = `<section class="mod log ${logDone ? "complete" : ""}" id="dailylog">
-    ${modHead(I.pulse, "Daily log", day.rest ? "Rest day. No work, no money checks." : "Three quick steps · about 2 minutes", `<span class="pill ${logDone ? "done" : "xp"}" id="logpill">${logDone ? "Logged" : `${steps.filter(Boolean).length}/3 · +30`}</span>`)}
-    <div class="mod-b">
-      ${day.rest ? `<p class="small muted">Rest counts toward your streak. Cut a venture before cutting sleep.</p>` : `<div class="steps">
-        <div class="step ${steps[0] ? "ok" : ""}" data-step="0">${stepNum(steps[0], 1)}<div><span class="q">What did you spend yesterday?</span><div class="money"><input id="spend" inputmode="decimal" data-day="spend" value="${esc(day.spend || "")}" placeholder="0"></div></div></div>
-        <div class="step ${steps[1] ? "ok" : ""}" data-step="1">${stepNum(steps[1], 2)}<div><span class="q">One line of gratitude</span><input id="gratitude" data-day="gratitude" value="${esc(day.gratitude || "")}" placeholder="Thank you for…"></div></div>
-        <div class="step ${steps[2] ? "ok" : ""}" data-step="2">${stepNum(steps[2], 3)}<div><span class="q">Energy today</span><div class="chips energy">${energy}</div></div></div>
-      </div>`}
-    </div>
-    <div class="mod-f"><button class="chip" aria-pressed="${!!day.rest}" data-act="rest">${I.moon} Rest day</button><button class="btn sm ghost" data-act="receipt">${I.coin} Money landed?</button></div>
+/* ---------- Building blocks ---------- */
+const vpill = (d, n) => `<span class="vpill"><i style="height:calc((100% - 4px) * ${n ? Math.min(1, d / n).toFixed(3) : 0})"></i></span>`;
+const lines = arr => arr.map(esc).join("<br>");
+function tile({ k, id = "", title, g, count = "", unit = "", half = false, btn = "arrow", dim = false, top = "", act = "page" }) {
+  const icon = btn === "lock" ? I.lock : btn === "plus" ? I.plus : I.arrow;
+  return `<button class="tile2 rib ${half ? "half" : ""} ${dim ? "dim" : ""}" style="--g:${G[g]}" data-act="${act}" data-k="${k}" data-id="${esc(id)}">
+    ${top ? `<span class="t2-top">${top}</span>` : ""}
+    <span class="t2-title">${lines(title)}</span>
+    <span class="t2-foot"><span class="t2-count">${count}${unit ? `<small>${esc(unit)}</small>` : ""}</span><span class="t2-btn">${icon}</span></span>
+  </button>`;
+}
+function pageHead(title, g, count = "", right = "") {
+  return `<section class="phead rib" style="--g:${G[g]}">
+    <div class="row between"><button class="pbtn" data-act="back" aria-label="Back">${I.left}</button>${right}</div>
+    <div class="stack" style="gap:10px"><h1 class="ptitle">${lines(title)}</h1>${count ? `<div class="t2-count">${count}</div>` : ""}</div>
   </section>`;
-
-  const next = gm.find(m => !done(m.id));
-  const missions = `<section class="mod mission">
-    ${modHead(I.target, p.n === 0 ? "This week's missions" : "This month's missions", `${esc(g.label)} · Sector ${p.n} ${esc(p.name)}`, `<span class="pill ${gDone === gm.length ? "done" : "now"}">${gDone}/${gm.length}</span>`)}
-    <div class="mod-b stack" style="gap:10px">
-      <div class="bar"><i style="width:${(gDone / gm.length * 100).toFixed(0)}%"></i></div>
-      ${t < PLAN_START ? `<p class="small muted">Launch is 1 Nov. You can start these early.</p>` : ""}
-      <div class="missions">${gm.map(m => missionRow(m)).join("")}</div>
-      ${p.note && gi === p.groups.length - 1 ? `<p class="small dim">${esc(p.note)}</p>` : ""}
-    </div>
-    <div class="mod-f"><span class="small dim">${next ? "Tap a mission to open its briefing" : "Waypoint cleared"}</span><button class="btn sm ghost" data-act="gomap" data-p="${p.n}">Sector map ${I.arrow}</button></div>
+}
+const greet = (small, big, n = "") => `<div class="greet"><span>${small}</span><h2>${big}${n !== "" ? ` <em>(${n})</em>` : ""}</h2></div>`;
+function crow(m) {
+  const d = done(m.id);
+  return `<button class="crow ${d ? "done" : ""}" data-act="mission" data-id="${m.id}"><span class="circ">${d ? I.check : ""}</span><span class="ct">${esc(m.t)}</span>${m.gear && !d ? `<span class="cg" title="Unlocks gear">${I[m.gear]}</span>` : ""}</button>`;
+}
+function crowList(ms, label = "", now = false) {
+  const open = ms.filter(m => !done(m.id)), shut = ms.filter(m => done(m.id));
+  return `<section class="panel">
+    ${label ? `<div class="row between"><span class="plabel">${esc(label)}</span>${now ? `<span class="pill now">Now</span>` : `<span class="mono small dim">${shut.length}/${ms.length}</span>`}</div>` : ""}
+    ${open.length ? `<div class="clist">${open.map(crow).join("")}</div>` : `<p class="pempty">All clear</p>`}
+    ${shut.length ? `<details class="cdone"><summary>Completed (${shut.length})</summary><div class="clist">${shut.map(crow).join("")}</div></details>` : ""}
   </section>`;
-
-  const focus = (day.focus || []).concat([{}, {}, {}]).slice(0, 3).map(f => f || {});
-  const fDone = focus.filter(f => f.done && f.t).length;
-  const focusMod = `<section class="mod focus">
-    ${modHead(I.focus, "Today's three", "The three things that move the plan today", `<span class="pill ${fDone === 3 ? "done" : "xp"}">${fDone}/3</span>`)}
-    <div class="mod-b stack" style="gap:6px">${focus.map((f, i) => `<div class="focus-row ${f.done ? "done" : ""}">
-      <button class="tick" role="checkbox" aria-checked="${f.done ? "true" : "false"}" aria-label="Done" data-act="focusdone" data-i="${i}">${I.check}</button>
-      <input id="focus-${i}" data-day="focus" data-i="${i}" value="${esc(f.t || "")}" placeholder="${["The one thing that moves the plan", "A money action", "A relationship note or outreach"][i]}">
-    </div>`).join("")}</div>
-    <div class="mod-f"><span class="small dim">+10 XP for each one you finish</span></div>
-  </section>`;
-
-  const jWritten = hasJournal(day);
-  const preview = [day.money, day.felt, day.learned, day.thankful && "Thankful: " + day.thankful].filter(Boolean).join(" · ");
-  const journal = `<section class="mod journal">
-    ${modHead(I.book, "Testimony journal", "Money, feelings, lessons, thanks · 5 minutes", `<span class="pill ${jWritten ? "done" : "xp"}">${jWritten ? "Written" : "+20"}</span>`)}
-    <div class="mod-b">${jWritten ? `<p class="small muted" style="display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden">${esc(preview)}</p>` : `<p class="small dim">Private until Apr 2027. Just a few honest lines.</p>`}</div>
-    <div class="mod-f"><span class="small dim">${esc(fmtDay(t))}</span><button class="btn sm ${jWritten ? "ghost" : "primary"}" data-act="journal" data-d="${t}">${jWritten ? "Edit entry" : "Write today's entry"}</button></div>
-  </section>`;
-
-  let dots = "";
+}
+function dots14() {
+  const t = todayISO(); let out = "";
   for (let i = 13; i >= 0; i--) {
     const k = addDays(t, -i), x = S.days[k] || {};
     const cls = x.rest ? "rest" : dayLogged(k) ? "on" : (k < t && k >= PLAN_START ? "miss" : "");
-    dots += `<i class="${cls} ${k === t ? "today" : ""}" title="${esc(fmtDay(k))}"></i>`;
+    out += `<i class="${cls} ${k === t ? "today" : ""}" title="${esc(fmtDay(k))}"></i>`;
   }
+  return `<div class="dots">${out}</div>`;
+}
+const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const MONTHS_LONG = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-  const [vRef, vCode, vText, vNudge] = verseFor(t);
-  const verseCard = `<section class="mod scripture">
-    ${modHead(I.book, "Verse of the day", esc(fmtDay(t)) + " · NIV", `<span class="pill">Sector ${p.n}</span>`)}
-    <div class="mod-b">
-      <a class="vlink" href="${youversion(vCode)}" target="_blank" rel="noopener" aria-label="Open ${esc(vRef)} in YouVersion">
-        <p class="vq">${esc(vText)}</p>
-        <div class="vref"><b>${esc(vRef)}</b><span class="vopen">Open in YouVersion ${I.ext}</span></div>
-      </a>
-      <div class="vapply"><b>Today:</b> ${esc(vNudge)}</div>
-    </div>
-    <div class="mod-f"><span class="small dim">Tap the verse to read it in context</span><button class="btn sm ghost" data-act="journal" data-d="${t}">Reflect in journal</button></div>
-    <p class="vcopy">Scripture quotations taken from The Holy Bible, New International Version® NIV®. Copyright © 1973, 1978, 1984, 2011 by Biblica, Inc.™ Used by permission. All rights reserved worldwide.</p>
+/* ---------- TODAY ---------- */
+function renderToday() {
+  const t = todayISO(), dt = parse(t), day = S.days[t] || {}, steps = dayLogSteps(day);
+  const sd = steps.filter(Boolean).length;
+  const { p, gi } = activeGroup(t), g = p.groups[gi], gm = g.items, gDone = gm.filter(m => done(m.id)).length;
+  const focus = (day.focus || []).concat([{}, {}, {}]).slice(0, 3).map(f => f || {}), fDone = focus.filter(f => f.done && f.t).length;
+  const ta = trackAreas(), tc = ta.filter(a => ["good", "warn", "bad"].includes(a.status)), tOn = tc.filter(a => a.status === "good").length;
+  const L = levelInfo(computeXP());
+  const [vRef, vCode, vText] = verseFor(t);
+  const fs = vText.length < 60 ? 34 : vText.length < 100 ? 28 : vText.length < 140 ? 24 : 21;
+
+  const notes = [];
+  const lastLogged = Object.keys(S.days).filter(k => k < t && dayLogged(k)).sort().pop();
+  if (lastLogged && diffDays(lastLogged, t) > 5) notes.push(`<button class="chip" data-act="page" data-k="daily"><i class="dot bad"></i>Call ${esc(S.state.settings.partner || "your partner")}</button>`);
+  else if (lastLogged && !dayLogged(addDays(t, -1)) && !dayLogged(t)) notes.push(`<button class="chip" data-act="page" data-k="daily"><i class="dot warn"></i>Missed yesterday</button>`);
+  const due = dueRituals();
+  if (due.includes("week")) notes.push(`<button class="chip" data-act="goweek"><i class="dot warn"></i>Sunday debrief</button>`);
+  if (due.includes("month")) notes.push(`<button class="chip" data-act="gomonth" data-m="${addMonths(monthOf(t), -1)}"><i class="dot warn"></i>Money date</button>`);
+  if (RETREAT_MONTHS.includes(monthOf(t))) notes.push(`<span class="chip"><i class="dot pre"></i>Retreat month</span>`);
+
+  const hero = `<section class="hero2 rib" style="--g:${G.verse}">
+    <div class="hh"><div><b>Today</b><span>${DAYS[dt.getDay()]}, ${MONTHS[dt.getMonth()]} ${dt.getDate()}</span></div><button class="avatar" data-act="page" data-k="pilot" aria-label="Level ${L.level}, open your profile">${hexBadge(L)}</button></div>
+    <a class="hv" href="${youversion(vCode)}" target="_blank" rel="noopener" aria-label="Open ${esc(vRef)} in YouVersion">
+      <p class="hv-t" style="font-size:${fs}px">${esc(vText)}</p>
+      <span class="hv-f"><span>${esc(vRef)} · NIV</span><span class="hv-go">${I.arrow}</span></span>
+    </a>
+    <div class="hcells"><button data-act="receipt">${I.plus} Log money</button><button data-act="journal" data-d="${t}">${I.pen} Journal</button></div>
   </section>`;
 
-  const ta = trackAreas(), tc = ta.filter(a => ["good", "warn", "bad"].includes(a.status));
-  const trackStrip = `<button class="mod neutral" data-act="gotrack" style="display:block;width:100%;text-align:left;padding:13px 16px">
-    <div class="row between"><span class="label">On track</span><span class="mono small">${tc.filter(a => a.status === "good").length}/${tc.length} ${I.arrow.replace("<svg", '<svg width="12" height="12" style="vertical-align:-2px"')}</span></div>
-    <div class="strip" style="margin-top:9px">${ta.map(a => `<span><i class="dot ${a.status}"></i>${esc(a.name.split(" · ")[0])}</span>`).join("")}</div>
-  </button>`;
-
-  return `${pilotCard()}
-    ${trackStrip}
-    ${verseCard}
-    ${alerts.join("")}
-    <div class="section-title">Daily ops</div>
-    ${dailyLog}
-    ${focusMod}
-    <div class="section-title">Expedition</div>
-    ${missions}
-    <div class="section-title">Reflect</div>
-    ${journal}
-    <section class="mod neutral">${modHead(I.pulse, "Last 14 days", "Filled: logged · violet ring: rest · red ring: missed")}<div class="mod-b"><div class="dots">${dots}</div></div></section>`;
+  const sub = t < PLAN_START ? `Launch in ${diffDays(t, PLAN_START)} days` : t > PLAN_END ? "Plan complete" : `Day ${diffDays(PLAN_START, t) + 1} of ${TOTAL_DAYS}`;
+  return `${hero}
+    ${notes.length ? `<div class="chips">${notes.join("")}</div>` : ""}
+    ${greet(sub, "Your day")}
+    <div class="tiles2">
+      ${tile({ k: "daily", title: ["Daily", "Log"], g: "ice", count: day.rest ? `${vpill(1, 1)}Rest` : `${vpill(sd, 3)}${sd}/3`, unit: day.rest ? "" : "steps" })}
+      <div class="duo">
+        ${tile({ k: "focus", title: ["Today's", "Three"], g: "jade", count: `${vpill(fDone, 3)}${fDone}/3`, half: true })}
+        ${tile({ k: "track", title: ["On", "Track"], g: "violet", count: tc.length ? `${vpill(tOn, tc.length)}${tOn}/${tc.length}` : "—", half: true })}
+      </div>
+      ${tile({ k: "week", title: ["This", p.n === 0 ? "Week" : "Month"], g: "sunset", count: `${vpill(gDone, gm.length)}${gDone}/${gm.length}`, unit: "missions", top: esc(g.label.split(" — ")[0]) + " · Sector " + p.n })}
+    </div>
+    <p class="fine">Scripture quotations taken from The Holy Bible, New International Version® NIV®. Copyright © 1973, 1978, 1984, 2011 by Biblica, Inc.™ Used by permission. All rights reserved worldwide.</p>`;
 }
 
 /* ---------- MAP ---------- */
@@ -1365,69 +1419,21 @@ function phaseStats(p) {
   const ex = p.exit.filter((_, i) => done(`p${p.n}x${i}`)).length;
   return { total: ids.length, done: d, pct: ids.length ? d / ids.length : 0, exitDone: ex, cleared: ex === p.exit.length };
 }
-function orb(pct, n, state) {
-  const r = 26, c = 2 * Math.PI * r;
-  return `<span class="orb"><svg viewBox="0 0 64 64" aria-hidden="true">
-    <circle cx="32" cy="32" r="${r}" fill="${state === "now" ? "rgba(20,34,60,1)" : "rgba(8,12,26,1)"}" stroke="rgba(170,195,255,.16)" stroke-width="3"/>
-    <circle cx="32" cy="32" r="${r}" fill="none" stroke="url(#hg)" stroke-width="3" stroke-linecap="round" stroke-dasharray="${c.toFixed(2)}" stroke-dashoffset="${(c * (1 - pct)).toFixed(2)}" transform="rotate(-90 32 32)"/>
-    ${state === "now" ? `<circle cx="32" cy="32" r="30" fill="none" stroke="rgba(139,233,255,.45)" stroke-width="1" stroke-dasharray="2 4"/>` : ""}
-  </svg><b>${state === "locked" ? I.lock.replace("<svg", '<svg width="16" height="16"') : n}</b></span>`;
-}
 function renderMap() {
-  const t = todayISO();
-  const nodes = PHASES.map(p => {
-    const s = phaseStats(p);
-    const state = s.cleared ? "past" : t > p.end ? "past" : (t >= p.start || p.n === 0) ? "now" : "locked";
-    const tag = s.cleared ? `<span class="pill done">Cleared</span>` : state === "now" ? `<span class="pill now">${t < PLAN_START ? "Launch" : "Active"}</span>` : state === "locked" ? `<span class="pill lock">${MONTHS[+p.start.slice(5, 7) - 1]} ’${p.start.slice(2, 4)}</span>` : `<span class="pill">${Math.round(s.pct * 100)}%</span>`;
-    return `<button class="node ${UI.mapPhase === p.n ? "sel" : ""} ${state === "locked" ? "locked" : ""}" data-act="phase" data-n="${p.n}">
-      ${orb(s.pct, p.n, state)}
-      <span class="nt"><b>${esc(p.name)}</b><span>${esc(p.theme)}</span><small>${fmtMonth(monthOf(p.start))}${p.start.slice(0, 7) !== p.end.slice(0, 7) ? " – " + fmtMonth(monthOf(p.end)) : ""} · ${s.done}/${s.total}</small></span>
-      ${tag}
-    </button>`;
+  const t = todayISO(), cur = phaseFor(t);
+  const tiles = PHASES.map(p => {
+    const s = phaseStats(p), locked = t < p.start && p.n > 0 && !s.done;
+    const when = `${MONTHS[+p.start.slice(5, 7) - 1]} ’${p.start.slice(2, 4)}`;
+    return tile({ k: "sector", id: String(p.n), title: [p.name], g: SECTOR_G[p.n], count: `${vpill(s.done, s.total)}${s.done}/${s.total}`, top: `${p.n === cur.n ? "Now · " : s.cleared ? "Cleared · " : ""}${when}`, btn: locked ? "lock" : "arrow", dim: locked });
   }).join("");
-
-  const p = PHASES[UI.mapPhase], s = phaseStats(p);
-  const locked = t < p.start && p.n > 0;
-  const wps = p.groups.map((g, gi) => {
-    const now = (t >= g.from && t <= g.to) || (t < PLAN_START && p.n === 0 && gi === 0);
-    const d = g.items.filter(m => done(m.id)).length;
-    return `<div class="wp ${now ? "now" : ""}"><div class="wp-h"><b>${esc(g.label)}</b>${now ? `<span class="pill now">You are here</span>` : `<span class="pill ${d === g.items.length ? "done" : ""}">${d}/${g.items.length}</span>`}</div>
-      <div class="missions">${g.items.map(m => missionRow(m)).join("")}</div></div>`;
-  }).join("");
-  const hp = p.exit.map((_, i) => `<i class="${done(`p${p.n}x${i}`) ? "hit" : ""}"></i>`).join("");
-  const trophies = p.milestones.map((m, i) => `<button class="trophy ${done(`p${p.n}m${i}`) ? "won" : ""}" data-act="mission" data-id="p${p.n}m${i}">${I.trophy}<span>${esc(m)}</span></button>`).join("");
-
-  return `<section class="mod neutral">${modHead(I.star, "Expedition map", "Five sectors, Nov 2026 to Apr 2028. Tap one to explore it.")}<div class="mod-b map">${nodes}</div></section>
-
-  <div class="section-title">Sector ${p.n} · ${esc(p.name)}</div>
-  <section class="mod mission">
-    ${modHead(I.target, esc(p.theme), esc(p.goal), `<span class="pill">${Math.round(s.pct * 100)}%</span>`)}
-    <div class="mod-b stack" style="gap:10px">
-      <a class="verse vsector" href="${youversion(p.vcode)}" target="_blank" rel="noopener" style="font-size:13px">${esc(p.verse)} ${I.ext.replace('<svg', '<svg width="11" height="11"')}</a>
-      <p class="small dim">Target income ${kmoney(p.income[0])}–${kmoney(p.income[1])} a month${locked ? " · Preview: you can start missions early" : ""}</p>
-      ${wps}
-      ${p.note ? `<p class="small dim">${esc(p.note)}</p>` : ""}
-    </div>
-  </section>
-
-  <section class="mod ritual">
-    ${modHead(I.skull, `Boss: ${esc(p.boss)}`, "Clear every exit condition to defeat it and leave the sector", `<span class="pill ${s.cleared ? "done" : "bad"}">${s.cleared ? "Defeated" : `${p.exit.length - s.exitDone} HP`}</span>`)}
-    <div class="mod-b stack" style="gap:12px">
-      <div class="boss-hp" aria-label="Boss health">${hp}</div>
-      <p class="callout">${esc(p.challenge)}</p>
-      <div class="missions">${p.exit.map((_, i) => missionRow(MISSIONS[`p${p.n}x${i}`], "Exit condition")).join("")}</div>
-      <p class="small dim">Dates are targets; the gates are the rule. If a gate is red, stay and strengthen, with no guilt.</p>
-    </div>
-  </section>
-
-  <section class="mod neutral">${modHead(I.trophy, "Sector achievements", "Milestones · +150 XP each")}<div class="mod-b"><div class="trophies">${trophies}</div></div></section>
-
-  <div class="section-title">Side quests</div>
-  <section class="mod journal">${modHead(I.academy, "Investing academy", "First 12 months: a student, not an investor", `<span class="pill">${ACADEMY.filter((_, i) => done("mod" + i)).length}/${ACADEMY.length}</span>`)}
-    <div class="mod-b"><div class="missions">${ACADEMY.map((a, i) => missionRow(MISSIONS["mod" + i], a[0] + " · " + a[2])).join("")}</div></div></section>
-  <section class="mod neutral">${modHead(I.codex, "Rules of the expedition", "What you signed up for")}
-    <div class="mod-b"><details class="fold"><summary>The ten non-negotiables</summary><div class="inner"><ol class="plain">${NON_NEGOTIABLES.map(x => `<li>${esc(x)}</li>`).join("")}</ol></div></details>
-    <details class="fold"><summary>Pause list · until Feb 2028</summary><div class="inner"><div class="chips">${PAUSE_LIST.map(x => `<span class="pill">${esc(x)}</span>`).join("")}</div></div></details></div></section>`;
+  const acDone = ACADEMY.filter((_, i) => done("mod" + i)).length;
+  return `${greet(`Sector ${cur.n} · ${esc(cur.name)}`, "Expedition", 5)}
+    <div class="tiles2">${tiles}
+      <div class="duo">
+        ${tile({ k: "academy", title: ["Academy"], g: "rose", count: `${vpill(acDone, ACADEMY.length)}${acDone}/${ACADEMY.length}`, half: true })}
+        ${tile({ k: "rules", title: ["Rules"], g: "steel", count: "10", unit: "rules", half: true })}
+      </div>
+    </div>`;
 }
 
 /* ---------- GEAR ---------- */
@@ -1443,158 +1449,241 @@ function gearHint(g) {
   return `${p.groups[m.g].label.split(" — ")[0]} · Sector ${p.n}`;
 }
 function renderGear() {
-  const sh = shieldLevel();
+  const sh = shieldLevel(), on = GEAR.filter(gearUnlocked).length;
   const cards = GEAR.map(g => {
-    const on = gearUnlocked(g);
-    const lv = g.special === "shield" && on ? `<span class="lv">${sh.tiers[sh.lv - 1][0]}</span>` : g.special === "sweep" && on ? `<span class="lv">×${S.state.receipts.length}</span>` : "";
-    return `<button class="gear ${on ? "on" : ""}" data-act="gear" data-id="${g.id}">${lv}<span class="gi">${I[g.id]}</span><b>${esc(g.name)}</b><span>${on ? esc(g.what) : esc(gearHint(g))}</span></button>`;
+    const u = gearUnlocked(g);
+    const lv = g.special === "shield" && u ? `<span class="lv">${sh.tiers[sh.lv - 1][0]}</span>` : g.special === "sweep" && u ? `<span class="lv">×${S.state.receipts.length}</span>` : "";
+    return `<button class="gear ${u ? "on" : ""}" data-act="gear" data-id="${g.id}">${lv}<span class="gi">${I[g.id]}</span><b>${esc(g.name)}</b></button>`;
   }).join("");
-  const stones = STONES.map((s, i) => `<button class="stone ${S.state.stones[i + 1] ? "laid" : ""}" data-act="stone" data-n="${i + 1}" aria-pressed="${!!S.state.stones[i + 1]}"><span class="n">${i + 1}</span><span class="t">${esc(s[0])}</span></button>`).join("");
-  return `${pilotCard()}
-  <section class="mod mission">${modHead(I.shield, "Loadout", "Each piece is earned by a mission and holds the record you wrote. Tap to open it.", `<span class="pill now">${GEAR.filter(gearUnlocked).length}/12</span>`)}<div class="mod-b"><div class="gear-grid">${cards}</div></div></section>
-  <section class="mod journal">${modHead(I.star, "Ebenezer stones", "“Thus far the LORD has helped us.” 1 Sam 7:12", `<span class="pill">${Object.keys(S.state.stones).length}/12</span>`)}<div class="mod-b stack" style="gap:10px"><div class="stones">${stones}</div><p class="small dim">Tap a stone to lay it. Celebrate without spending: a thank-you note, a family walk, a home-cooked meal, the wins jar.</p></div></section>`;
+  const laid = Object.keys(S.state.stones).length;
+  return `${greet("Earned by missions", "Gear", `${on}/12`)}
+    <section class="panel"><div class="gear-grid">${cards}</div></section>
+    ${tile({ k: "stones", title: ["Ebenezer", "Stones"], g: "sunset", count: `${vpill(laid, 12)}${laid}/12` })}`;
 }
 
 /* ---------- JOURNAL ---------- */
 function renderJournal() {
-  const due = dueRituals();
-  const tabs = [["log", "Entries"], ["week", "Sunday debrief"], ["month", "Money date"]].map(([k, l]) => `<button aria-pressed="${UI.jTab === k}" data-act="jtab" data-k="${k}">${l}${(k === "week" && due.includes("week")) || (k === "month" && due.includes("month")) ? " •" : ""}</button>`).join("");
-  let body = "";
-  if (UI.jTab === "log") {
-    const keys = Object.keys(S.days).filter(dayLogged).sort().reverse();
-    body = `<section class="mod journal">${modHead(I.book, "Testimony journal", "Tap an entry to read or edit it", `<span class="pill">${keys.length}</span>`)}
-      <div class="mod-b stack" style="gap:10px">
-        <div class="row"><input id="jdate" type="date" max="${todayISO()}" value="${todayISO()}" style="flex:1"><button class="btn sm" data-act="journalpick">Open day</button></div>
-        ${keys.length ? keys.slice(0, 150).map(k => {
-          const x = S.days[k];
-          const text = [x.money, x.felt, x.learned, x.thankful && "Thankful: " + x.thankful, x.gratitude].filter(Boolean).join(" · ");
-          return `<button class="entry" data-act="journal" data-d="${k}"><div class="ed"><span>${esc(fmtDay(k).toUpperCase())} · S${phaseFor(k).n}</span><span>${x.rest ? "rest" : x.energy ? "energy " + x.energy + "/5" : ""}</span></div><p>${esc(text || "Daily log only")}</p></button>`;
-        }).join("") : `<div class="empty">No entries yet. Write today's from the Today tab, or open any day above.</div>`}
-      </div></section>`;
-  } else if (UI.jTab === "week") {
-    const k = "w-" + UI.week, r = S.reviews[k] || {};
-    const steps = [["receipts", "Receipts checked and recorded"], ["sweeps", "Every receipt swept: Tax, Giving, Emergency, Debt"], ["pipeline", "Money in the next 30 days checked"], ["outreach", "Five relationship-first notes sent"], ["rested", "One full rest day kept"]];
-    const energy = [1, 2, 3, 4, 5].map(n => `<button class="chip" aria-pressed="${r.energy === n}" data-act="wenergy" data-n="${n}">${n}</button>`).join("");
-    const past = Object.keys(S.reviews).filter(x => x.startsWith("w-") && S.reviews[x].done).sort().reverse();
-    const low = past.length >= 2 && past.slice(0, 2).every(x => (S.reviews[x].energy || 5) <= 2);
-    body = `<div class="row between"><button class="x" data-act="week" data-n="-7" aria-label="Previous week">${I.left}</button><div style="text-align:center"><b style="font-weight:500">Week ending ${esc(fmtDay(UI.week))}</b><div class="mono small dim">SUNDAY EVENING · 30 MIN</div></div><button class="x" data-act="week" data-n="7" aria-label="Next week">${I.right}</button></div>
-      ${low ? `<div class="mod ritual">${modHead(I.alert, "Low energy two weeks running", "The plan's rule: cut a venture, not sleep.")}</div>` : ""}
-      <section class="mod ritual ${r.done ? "complete" : ""}">${modHead(I.cal, "Sunday debrief", "Run the checklist, then set one money action", `<span class="pill ${r.done ? "done" : "xp"}">${r.done ? "Done" : "+60"}</span>`)}
-        <div class="mod-b stack" style="gap:12px">
-          <div>${steps.map(([id, l]) => `<button class="ck" role="checkbox" aria-checked="${r[id] ? "true" : "false"}" data-act="wcheck" data-id="${id}"><span class="tick" aria-checked="${r[id] ? "true" : "false"}">${I.check}</span><span>${esc(l)}</span></button>`).join("")}</div>
-          <label class="field"><span>Money in the next 30 days</span><div class="money"><input id="w-next30" inputmode="decimal" data-rev="next30" value="${esc(r.next30 || "")}" placeholder="0"></div></label>
-          <label class="field"><span>Pipeline notes</span><textarea id="w-pipeline" rows="2" data-rev="pipeline">${esc(r.pipeline || "")}</textarea></label>
-          <label class="field"><span>One money action for next week</span><input id="w-action" data-rev="action" value="${esc(r.action || "")}" placeholder="e.g. Call the card issuer about the rate"></label>
-          <div class="field"><span>Energy this week</span><div class="chips energy">${energy}</div></div>
-        </div>
-        <div class="mod-f"><span class="small dim">${past.length} debriefs done</span><button class="btn sm ${r.done ? "ghost" : "primary"}" data-act="wdone">${r.done ? "Reopen" : "Complete debrief"}</button></div>
-      </section>`;
-  } else {
-    const k = "m-" + UI.month, r = S.reviews[k] || {};
-    const f = (id, label, rows, ph = "") => `<label class="field"><span>${label}</span><textarea id="m-${id}" rows="${rows}" data-rev="${id}" placeholder="${ph}">${esc(r[id] || "")}</textarea></label>`;
-    const ck = (id, l) => `<button class="ck" role="checkbox" aria-checked="${r[id] ? "true" : "false"}" data-act="mcheck" data-id="${id}"><span class="tick" aria-checked="${r[id] ? "true" : "false"}">${I.check}</span><span>${esc(l)}</span></button>`;
-    body = `<div class="row between"><button class="x" data-act="month" data-n="-1" aria-label="Previous month">${I.left}</button><div style="text-align:center"><b style="font-weight:500">${esc(fmtMonth(UI.month))}</b><div class="mono small dim">MONEY DATE · 60–90 MIN</div></div><button class="x" data-act="month" data-n="1" aria-label="Next month">${I.right}</button></div>
-      <section class="mod journal ${r.done ? "complete" : ""}">${modHead(I.heart, "Monthly reflection", "3 wins, 1 struggle, 1 lesson, next step, one Scripture", `<span class="pill ${r.done ? "done" : "xp"}">${r.done ? "Done" : "+120"}</span>`)}
-        <div class="mod-b stack" style="gap:12px">
-          ${f("wins", "3 wins", 3, "1.\n2.\n3.")}${f("struggle", "1 struggle", 1)}${f("lesson", "1 lesson", 1)}${f("next", "Next step", 1)}${f("scripture", "One Scripture", 1, "e.g. Lam 3:22–23")}
-          <div>${ck("date", "Money date held")}${ck("wife", "Your wife joined the last 20 minutes")}${ck("dash", "Balances updated in Money")}</div>
-        </div>
-        <div class="mod-f"><span class="small dim">Sector ${phaseFor(UI.month + "-15").n}</span><button class="btn sm ${r.done ? "ghost" : "primary"}" data-act="mdone">${r.done ? "Reopen" : "Complete reflection"}</button></div>
-      </section>`;
-  }
-  return `<div class="subtabs">${tabs}</div>${body}`;
+  const t = todayISO(), due = dueRituals();
+  const n = Object.keys(S.days).filter(dayLogged).length;
+  const wk = S.reviews["w-" + weekKey(t)] || {}, prevM = addMonths(monthOf(t), -1), mr = S.reviews["m-" + (monthOf(t) < "2026-12" ? "2026-11" : prevM)] || {};
+  return `${greet("Testimony, debriefs, money dates", "Journal")}
+    <div class="tiles2">
+      ${tile({ k: "entries", title: ["Entries"], g: "rose", count: String(n), unit: n === 1 ? "entry" : "entries", btn: "arrow" })}
+      <div class="duo">
+        ${tile({ k: "debrief", title: ["Sunday", "Debrief"], g: "ember", count: wk.done ? `${vpill(1, 1)}Done` : due.includes("week") ? "Due" : "—", half: true })}
+        ${tile({ k: "moneydate", title: ["Money", "Date"], g: "violet", count: mr.done ? `${vpill(1, 1)}Done` : due.includes("month") ? "Due" : "—", half: true })}
+      </div>
+    </div>`;
 }
 
 /* ---------- MONEY ---------- */
 function renderMoney() {
-  const t = todayISO(), ym = monthOf(t), p = phaseFor(t);
-  const snap = latestSnap() || {};
-  const e = E(), byMonth = incomeByMonth(), thisMonth = byMonth[ym] || 0, a3 = avg3(ym);
-  const startDebt = num(S.state.settings.startDebt);
-  const debtLeft = snap.debt !== undefined && snap.debt !== "" ? num(snap.debt) : null;
-  const cleared = startDebt && debtLeft !== null ? Math.max(0, 1 - debtLeft / startDebt) : null;
-  const marker = DEBT_MARKERS.find(m => m.date >= t) || DEBT_MARKERS[2];
-  const year = t.slice(0, 4);
-  const giveMTD = S.state.receipts.filter(r => monthOf(r.date) === ym).reduce((s, r) => s + num((r.alloc || {}).give), 0);
-  const giveYTD = S.state.receipts.filter(r => r.date.slice(0, 4) === year).reduce((s, r) => s + num((r.alloc || {}).give), 0);
-  const em = emergencyNow(), sh = shieldLevel(), g = gates();
-  const months = []; for (let i = 5; i >= 0; i--) months.push(addMonths(ym, -i));
-  const maxV = Math.max(1, ...months.map(m => byMonth[m] || 0), p.income[1]);
-  const bars = months.map(m => `<div class="b ${m === ym ? "now" : ""}"><span>${byMonth[m] ? kmoney(byMonth[m]) : ""}</span><i style="height:${((byMonth[m] || 0) / maxV * 78).toFixed(1)}%"></i><span>${MONTHS[+m.slice(5) - 1]}</span></div>`).join("");
-  const recent = S.state.receipts.slice().sort((a, b) => b.date.localeCompare(a.date)).slice(0, 8);
-
-  const areas = trackAreas();
-  const counted = areas.filter(a => ["good", "warn", "bad"].includes(a.status));
-  const onTrack = counted.filter(a => a.status === "good").length;
-  const rr = 30, rc = 2 * Math.PI * rr, frac = counted.length ? onTrack / counted.length : 0;
-  const summary = t < PLAN_START ? "The plan starts 1 Nov. Targets switch on as each date arrives." : !counted.length ? "Add your numbers to see where you stand." : onTrack === counted.length ? "Every area with data is on track. Keep going." : `${counted.length - onTrack} area${counted.length - onTrack === 1 ? "" : "s"} to watch: ${counted.filter(a => a.status !== "good").map(a => a.name.split(" · ")[0]).join(", ")}.`;
-  const areaCard = a => {
-    const pct = a.tgt && a.cur !== null ? Math.max(0, Math.min(1, a.cur / a.tgt)) : 0;
-    return `<button class="area ${a.status}" data-act="track" data-id="${a.id}">
-      <div class="ah"><span>${esc(a.name)}</span><i class="dot ${a.status}" title="${ST_LABEL[a.status]}"></i></div>
-      <div class="av">${esc(a.value)}<small>${esc(a.unit || "")}</small></div>
-      <div class="bar"><i style="width:${(pct * 100).toFixed(0)}%"></i></div>
-      <div class="at">${esc(a.note)}</div>
-    </button>`;
-  };
-  const overview = `<section class="mod neutral" id="overview">${modHead(I.target, "Am I on track?", "Where the plan says you should be today, area by area. Tap one for its milestones.")}
-    <div class="mod-b stack" style="gap:14px">
-      <div class="track-sum">
-        <div class="track-ring"><svg viewBox="0 0 72 72" aria-hidden="true"><circle cx="36" cy="36" r="${rr}" fill="none" stroke="rgba(170,195,255,.12)" stroke-width="5"/><circle cx="36" cy="36" r="${rr}" fill="none" stroke="${frac === 1 ? "#6ff0c0" : "url(#hg)"}" stroke-width="5" stroke-linecap="round" stroke-dasharray="${rc.toFixed(2)}" stroke-dashoffset="${(rc * (1 - frac)).toFixed(2)}" transform="rotate(-90 36 36)"/></svg><b>${onTrack}/${counted.length}</b><small>ON TRACK</small></div>
-        <div class="stack" style="gap:6px"><p style="font-size:14px">${esc(summary)}</p><div class="strip"><span><i class="dot good"></i>On track</span><span><i class="dot warn"></i>Close</span><span><i class="dot bad"></i>Behind</span><span><i class="dot none"></i>Needs data</span></div></div>
+  const t = todayISO(), ym = monthOf(t), snap = latestSnap();
+  const ta = trackAreas(), tc = ta.filter(a => ["good", "warn", "bad"].includes(a.status)), tOn = tc.filter(a => a.status === "good").length;
+  const g = gates(), gn = [g.g1, g.g2, g.g3].filter(Boolean).length;
+  const thisMonth = incomeByMonth()[ym] || 0;
+  return `${greet(fmtMonth(ym), "Money")}
+    <button class="btn primary block big" data-act="receipt">${I.plus} Log a receipt</button>
+    <div class="tiles2">
+      ${tile({ k: "track", title: ["On", "Track"], g: "violet", count: tc.length ? `${vpill(tOn, tc.length)}${tOn}/${tc.length}` : "—", unit: tc.length ? "areas" : "", top: ta.map(a => `<i class="dot ${a.status}"></i>`).join("") })}
+      <div class="duo">
+        ${tile({ k: "income", title: ["Income"], g: "ice", count: kmoney(thisMonth), half: true })}
+        ${tile({ k: "balances", title: ["Balances"], g: "jade", count: snap ? esc(fmtShortDay(snap.date)) : "—", half: true })}
+        ${tile({ k: "streams", title: ["Streams"], g: "ember", count: String(streams().length), half: true })}
+        ${tile({ k: "receipts", title: ["Receipts"], g: "steel", count: String(S.state.receipts.length), half: true })}
+        ${tile({ k: "gates", title: ["Gates"], g: "sunset", count: `${vpill(gn, 3)}${gn}/3`, half: true })}
+        ${tile({ k: "numbers", title: ["Your", "Numbers"], g: "rose", count: E() ? kmoney(E()) : "Set", unit: E() ? "E" : "", half: true })}
       </div>
-      <div class="areas">${areas.map(areaCard).join("")}</div>
-    </div>
-    <div class="mod-f"><span class="small dim">By Apr 2028: $9–12k/mo · 4+ months saved · 75% debt cleared · 10% giving · first investment</span></div>
-  </section>`;
+    </div>`;
+}
+const fmtShortDay = s => { const d = parse(s); return `${d.getDate()} ${MONTHS[d.getMonth()]}`; };
 
-  return `${overview}
-  <section class="mod money">${modHead(I.sweep, "Sweep a receipt", `Tax, Giving, Emergency and Debt out first; the rest is salary. Sector ${p.n} split.`, `<span class="pill xp">+25</span>`)}
-    <div class="mod-b"><button class="btn primary block" data-act="receipt">${I.coin} Log a receipt</button></div></section>
-
-  <section class="mod neutral">${modHead(I.pulse, "Income trend", `${esc(fmtMonth(ym))}: ${money(thisMonth)} · 3-month avg ${money(Math.round(a3))}`, thisMonth >= p.income[0] ? `<span class="pill done">on target</span>` : "")}
-    <div class="mod-b"><div class="bars">${bars}</div><p class="small dim" style="margin-top:8px">Sector ${p.n} target ${kmoney(p.income[0])}–${kmoney(p.income[1])} a month · Net worth ${snap.net !== undefined && snap.net !== "" ? kmoney(num(snap.net)) : "not entered"}${snap.date ? " (as of " + esc(fmtDay(snap.date)) + ")" : ""}</p></div></section>
-
-  <section class="mod money" id="balances-mod">${modHead(I.ledger, "Update balances", "Do this at each Sunday debrief", `<span class="pill xp">+15</span>`)}
-    <div class="mod-b"><div class="grid2">
-      <label class="field"><span>Emergency pot</span><div class="money"><input id="b-emergency" inputmode="decimal" value="${esc(snap.emergency ?? "")}" placeholder="0"></div></label>
-      <label class="field"><span>Debt remaining</span><div class="money"><input id="b-debt" inputmode="decimal" value="${esc(snap.debt ?? "")}" placeholder="0"></div></label>
-      <label class="field"><span>Hub buffer</span><div class="money"><input id="b-hub" inputmode="decimal" value="${esc(snap.hub ?? "")}" placeholder="0"></div></label>
-      <label class="field"><span>Invested</span><div class="money"><input id="b-invest" inputmode="decimal" value="${esc(snap.invest ?? "")}" placeholder="0"></div></label>
-      <label class="field"><span>Net worth</span><div class="money"><input id="b-net" inputmode="text" value="${esc(snap.net ?? "")}" placeholder="-25000"></div></label>
-    </div></div>
-    <div class="mod-f"><span class="small dim">${S.state.snaps.length} updates</span><button class="btn sm primary" data-act="snap">Save balances</button></div></section>
-
-  <section class="mod ritual">${modHead(I.lock, "Investing gates", "All three green before any real money (earliest Nov 2027)", `<span class="pill">${[g.g1, g.g2, g.g3].filter(Boolean).length}/3</span>`)}
-    <div class="mod-b">
-      <div class="gate"><span class="g">G1</span><p>Emergency ≥ 1 month of essentials${e ? ` (${money(e)})` : ""}</p><span class="pill ${g.g1 ? "done" : ""}">${g.g1 ? "green" : "auto"}</span></div>
-      <div class="gate"><span class="g">G2</span><p>All debt above ~8% cleared, or on a funded plan</p><button class="chip" aria-pressed="${g.g2}" data-act="gate" data-g="g2">${g.g2 ? "green" : "red"}</button></div>
-      <div class="gate"><span class="g">G3</span><p>3 months where income covers salary, giving, tax, debt, savings</p><button class="chip" aria-pressed="${g.g3}" data-act="gate" data-g="g3">${g.g3 ? "green" : "red"}</button></div>
-    </div></section>
-
-  <section class="mod money" id="streams-mod">${modHead(I.signal, "Income streams", "Your own labels for where money comes from", `<span class="pill">${streams().length}</span>`)}
-    <div class="mod-b stack" style="gap:10px">
-      ${streams().length ? `<div>${streams().map(st => {
-        const rs = S.state.receipts.filter(r => r.streamId === st.id);
-        const tot = rs.reduce((a, r) => a + num(r.amount), 0), mtd = rs.filter(r => monthOf(r.date) === ym).reduce((a, r) => a + num(r.amount), 0);
-        return `<div class="list-row" style="grid-template-columns:1fr auto auto auto"><span class="grow" style="min-width:0"><span style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(st.name)}</span><span class="dim small mono">${rs.length} receipt${rs.length === 1 ? "" : "s"} · ${esc(MONTHS[+ym.slice(5) - 1])} ${money(mtd)}</span></span><button class="chip" style="min-height:28px;padding:0 10px;font-size:11px" aria-pressed="${!!st.recurring}" data-act="streamrec" data-id="${esc(st.id)}">${st.recurring ? "Recurring" : "One-off"}</button><span class="mono">${money(tot)}</span><button class="x" data-act="delstream" data-id="${esc(st.id)}" aria-label="Delete stream ${esc(st.name)}">✕</button></div>`;
-      }).join("")}</div>` : `<p class="small dim">No streams yet. Add one here or while logging a receipt.</p>`}
-      <div class="row"><input id="newstream" placeholder="New stream name" maxlength="40" style="flex:1"><button class="btn sm" data-act="addstream">${I.plus} Add</button></div>
-      ${streams().length ? `<p class="small dim">Tap Recurring / One-off to mark retainers and other repeat income. Deleting a stream keeps its past receipts and their label.</p>` : ""}
-    </div></section>
-
-  <section class="mod neutral">${modHead(I.coin, "Recent receipts", `${S.state.receipts.length} logged`)}
-    <div class="mod-b">${recent.length ? recent.map(r => `<div class="list-row"><span class="grow" style="min-width:0"><span style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc([r.client, streamName(r)].filter(Boolean).join(" · ") || "Receipt")}</span><span class="dim small mono">${esc(fmtDay(r.date))} · give ${money(num((r.alloc || {}).give), 2)}</span></span><span class="mono">${money(num(r.amount))}</span><button class="x" data-act="delreceipt" data-id="${esc(r.id)}" aria-label="Delete receipt">✕</button></div>`).join("") : `<p class="small dim">No receipts yet. Your first one unlocks the Sweep Engine.</p>`}</div></section>
-
-  <section class="mod neutral">${modHead(I.hub, "Your numbers", "Missions fill these in; edit them here if they change")}
-    <div class="mod-b stack" style="gap:12px">
-      <label class="field"><span>Monthly essentials (E)</span><div class="money"><input id="s-essentials" inputmode="decimal" data-set="essentials" value="${esc(S.state.settings.essentials || "")}" placeholder="From “My Numbers”"></div></label>
-      <label class="field"><span>Starting total debt</span><div class="money"><input id="s-startDebt" inputmode="decimal" data-set="startDebt" value="${esc(S.state.settings.startDebt || "")}" placeholder="From the debt inventory"></div></label>
-      <label class="field"><span>Fixed monthly salary (paid from the Hub on the 1st)</span><div class="money"><input id="s-salary" inputmode="decimal" data-set="salary" value="${esc(S.state.settings.salary || "")}" placeholder="Set at your lowest realistic month"></div></label>
-      <label class="field"><span>Accountability partner</span><input id="s-partner" data-set="partner" value="${esc(S.state.settings.partner || "")}" placeholder="Church friend"></label>
-      <div class="row wrap" style="gap:8px"><button class="btn sm ghost" data-act="export">Save a backup</button><label class="btn sm ghost" for="importfile" style="cursor:pointer">Restore backup</label><input id="importfile" type="file" accept="application/json,.json" hidden></div>
-      <p class="small dim">${S.backend.kind === "db" ? "Saved privately to your account. Only you can see these entries." : "Saved on this device only. Use backups to move between devices."} Education and structure, not licensed advice.</p>
-    </div></section>`;
+/* ---------- PAGES ---------- */
+function renderPage(pg) {
+  const t = todayISO(), ym = monthOf(t);
+  switch (pg.k) {
+    case "pilot": {
+      const L = levelInfo(computeXP()), st = streak(), p = phaseFor(t);
+      const dayTxt = t < PLAN_START ? `T−${diffDays(t, PLAN_START)}` : t > PLAN_END ? "Done" : `${diffDays(PLAN_START, t) + 1}`;
+      return `${pageHead([`Level ${L.level}`], "violet", `<span>${esc(L.rank)}</span>`)}
+        <section class="panel">
+          <div class="row between"><span class="plabel">Experience</span><span class="mono small">${L.xp.toLocaleString()} XP</span></div>
+          <div class="bar"><i style="width:${(L.into / L.need * 100).toFixed(1)}%"></i></div>
+          <span class="small dim">${(L.need - L.into).toLocaleString()} XP to level ${L.level + 1}</span>
+        </section>
+        <div class="stats" style="margin:0">
+          <div class="stat"><b>${dayTxt}</b><span>${t < PLAN_START ? "days to launch" : `day of ${TOTAL_DAYS}`}</span></div>
+          <div class="stat"><b>${st.n}</b><span>day streak${st.grace ? " · 1 miss" : ""}</span></div>
+          <div class="stat"><b>${GEAR.filter(gearUnlocked).length}/12</b><span>gear</span></div>
+        </div>
+        <section class="panel"><span class="plabel">Last 14 days</span>${dots14()}</section>
+        <section class="panel"><span class="plabel">Sector ${p.n} · ${esc(p.name)}</span><a class="verse vsector" href="${youversion(p.vcode)}" target="_blank" rel="noopener">${esc(p.verse)}</a></section>`;
+    }
+    case "daily": {
+      const day = S.days[t] || {}, steps = dayLogSteps(day), all = day.rest || steps.every(Boolean);
+      const energy = [1, 2, 3, 4, 5].map(n => `<button class="chip" aria-pressed="${day.energy === n}" data-act="energy" data-n="${n}">${n}</button>`).join("");
+      const num_ = (ok, n) => `<span class="num">${ok ? I.check : n}</span>`;
+      return `${pageHead(["Daily", "Log"], "ice", `${vpill(steps.filter(Boolean).length, 3)}<span id="logpill">${all ? "Logged" : steps.filter(Boolean).length + "/3"}</span>`, `<button class="chip rest-chip" aria-pressed="${!!day.rest}" data-act="rest">${I.moon} Rest</button>`)}
+        <section class="panel" id="dailylog">
+          ${day.rest ? `<p class="muted">Rest day. No work, no money checks.</p>` : `<div class="steps">
+            <div class="step ${steps[0] ? "ok" : ""}" data-step="0">${num_(steps[0], 1)}<div><span class="q">Spent yesterday</span><div class="money"><input id="spend" inputmode="decimal" data-day="spend" value="${esc(day.spend || "")}" placeholder="0"></div></div></div>
+            <div class="step ${steps[1] ? "ok" : ""}" data-step="1">${num_(steps[1], 2)}<div><span class="q">Gratitude</span><input id="gratitude" data-day="gratitude" value="${esc(day.gratitude || "")}" placeholder="Thank you for…"></div></div>
+            <div class="step ${steps[2] ? "ok" : ""}" data-step="2">${num_(steps[2], 3)}<div><span class="q">Energy</span><div class="chips energy">${energy}</div></div></div>
+          </div>`}
+        </section>
+        <section class="panel"><span class="plabel">Last 14 days</span>${dots14()}</section>`;
+    }
+    case "focus": {
+      const day = S.days[t] || {}, focus = (day.focus || []).concat([{}, {}, {}]).slice(0, 3).map(f => f || {}), fDone = focus.filter(f => f.done && f.t).length;
+      return `${pageHead(["Today's", "Three"], "jade", `${vpill(fDone, 3)}${fDone}/3`)}
+        <section class="panel">${focus.map((f, i) => `<div class="focus-row ${f.done ? "done" : ""}">
+          <button class="tick" role="checkbox" aria-checked="${f.done ? "true" : "false"}" aria-label="Done" data-act="focusdone" data-i="${i}">${I.check}</button>
+          <input id="focus-${i}" data-day="focus" data-i="${i}" value="${esc(f.t || "")}" placeholder="${["The one thing", "A money action", "A relationship note"][i]}">
+        </div>`).join("")}</section>`;
+    }
+    case "week": {
+      const { p, gi } = activeGroup(t), g = p.groups[gi], d = g.items.filter(m => done(m.id)).length;
+      return `${pageHead(["This", p.n === 0 ? "Week" : "Month"], "sunset", `${vpill(d, g.items.length)}${d}/${g.items.length}`)}
+        ${crowList(g.items, g.label)}
+        ${p.note && gi === p.groups.length - 1 ? `<p class="small dim">${esc(p.note)}</p>` : ""}
+        <button class="btn ghost block" data-act="page" data-k="sector" data-id="${p.n}">Sector ${p.n} · ${esc(p.name)} ${I.arrow}</button>`;
+    }
+    case "track": {
+      const areas = trackAreas(), counted = areas.filter(a => ["good", "warn", "bad"].includes(a.status)), onT = counted.filter(a => a.status === "good").length;
+      const summary = t < PLAN_START ? "Targets switch on from 1 Nov." : !counted.length ? "Add your numbers to see where you stand." : onT === counted.length ? "Everything with data is on track." : `Watch: ${counted.filter(a => a.status !== "good").map(a => a.name).join(", ")}.`;
+      return `${pageHead(["On", "Track"], "violet", `${vpill(onT, counted.length || 1)}${onT}/${counted.length}`)}
+        <p class="muted" style="padding:0 2px">${esc(summary)}</p>
+        <div class="areas">${areas.map(a => {
+          const pct = a.tgt && a.cur !== null ? Math.max(0, Math.min(1, a.cur / a.tgt)) : 0;
+          return `<button class="area ${a.status}" data-act="track" data-id="${a.id}"><div class="ah"><span>${esc(a.name)}</span><i class="dot ${a.status}"></i></div><div class="av">${esc(a.value)}<small>${esc(a.unit || "")}</small></div><div class="bar"><i style="width:${(pct * 100).toFixed(0)}%"></i></div></button>`;
+        }).join("")}</div>
+        <div class="strip"><span><i class="dot good"></i>On track</span><span><i class="dot warn"></i>Close</span><span><i class="dot bad"></i>Behind</span><span><i class="dot none"></i>Needs data</span></div>`;
+    }
+    case "sector": {
+      const p = PHASES[+pg.id] || PHASES[0], s = phaseStats(p);
+      const hp = p.exit.map((_, i) => `<i class="${done(`p${p.n}x${i}`) ? "hit" : ""}"></i>`).join("");
+      const range = `${fmtMonth(monthOf(p.start))}${p.start.slice(0, 7) !== p.end.slice(0, 7) ? " – " + fmtMonth(monthOf(p.end)) : ""}`;
+      return `${pageHead([p.name], SECTOR_G[p.n], `${vpill(s.done, s.total)}${s.done}/${s.total}`, `<span class="pill" style="color:#fff;border-color:rgba(255,255,255,.5)">${esc(range)}</span>`)}
+        <section class="panel"><span class="plabel">${esc(p.theme)}</span><a class="verse vsector" href="${youversion(p.vcode)}" target="_blank" rel="noopener">${esc(p.verse)}</a>
+          <details class="cdone"><summary>Goal</summary><p class="small muted" style="padding-top:6px">${esc(p.goal)} Target ${kmoney(p.income[0])}–${kmoney(p.income[1])} a month.</p></details></section>
+        ${p.groups.map(g => crowList(g.items, g.label.split(" — ")[0], (t >= g.from && t <= g.to) || (t < PLAN_START && p.n === 0 && g === p.groups[0]))).join("")}
+        <section class="panel">
+          <div class="row between"><span class="plabel">Boss · ${esc(p.boss)}</span><span class="pill ${s.cleared ? "done" : "bad"}">${s.cleared ? "Defeated" : `${p.exit.length - s.exitDone} HP`}</span></div>
+          <div class="boss-hp">${hp}</div>
+          <div class="clist">${p.exit.map((_, i) => crow(MISSIONS[`p${p.n}x${i}`])).join("")}</div>
+          <details class="cdone"><summary>Briefing</summary><p class="small muted" style="padding-top:6px">${esc(p.challenge)}</p></details>
+        </section>
+        <section class="panel"><span class="plabel">Achievements</span><div class="trophies">${p.milestones.map((m, i) => `<button class="trophy ${done(`p${p.n}m${i}`) ? "won" : ""}" data-act="mission" data-id="p${p.n}m${i}">${I.trophy}<span>${esc(m)}</span></button>`).join("")}</div></section>`;
+    }
+    case "academy": {
+      const d = ACADEMY.filter((_, i) => done("mod" + i)).length;
+      return `${pageHead(["Academy"], "rose", `${vpill(d, ACADEMY.length)}${d}/${ACADEMY.length}`)}
+        ${crowList(ACADEMY.map((_, i) => MISSIONS["mod" + i]), "Learning path")}`;
+    }
+    case "rules":
+      return `${pageHead(["Rules"], "steel")}
+        <section class="panel"><span class="plabel">Non-negotiables</span><ol class="plain">${NON_NEGOTIABLES.map(x => `<li>${esc(x)}</li>`).join("")}</ol></section>
+        <section class="panel"><span class="plabel">Paused until Feb 2028</span><div class="chips">${PAUSE_LIST.map(x => `<span class="pill">${esc(x)}</span>`).join("")}</div></section>`;
+    case "stones": {
+      const laid = Object.keys(S.state.stones).length;
+      return `${pageHead(["Ebenezer", "Stones"], "sunset", `${vpill(laid, 12)}${laid}/12`)}
+        <section class="panel"><div class="stones">${STONES.map((s, i) => `<button class="stone ${S.state.stones[i + 1] ? "laid" : ""}" data-act="stone" data-n="${i + 1}" aria-pressed="${!!S.state.stones[i + 1]}"><span class="n">${i + 1}</span><span class="t">${esc(s[0])}</span></button>`).join("")}</div></section>
+        <p class="verse" style="padding:0 4px">“Thus far the LORD has helped us.” 1 Sam 7:12</p>`;
+    }
+    case "entries": {
+      const keys = Object.keys(S.days).filter(dayLogged).sort().reverse();
+      return `${pageHead(["Entries"], "rose", String(keys.length))}
+        <section class="panel"><div class="row"><input id="jdate" type="date" max="${t}" value="${t}" style="flex:1"><button class="btn sm" data-act="journalpick">Open</button></div></section>
+        ${keys.length ? keys.slice(0, 150).map(k => {
+          const x = S.days[k], text = [x.money, x.felt, x.learned, x.thankful && "Thankful: " + x.thankful, x.gratitude].filter(Boolean).join(" · ");
+          return `<button class="entry" data-act="journal" data-d="${k}"><div class="ed"><span>${esc(fmtDay(k).toUpperCase())}</span><span>${x.rest ? "rest" : x.energy ? "energy " + x.energy : ""}</span></div><p>${esc(text || "Daily log")}</p></button>`;
+        }).join("") : `<p class="pempty" style="text-align:center">No entries yet</p>`}`;
+    }
+    case "debrief": {
+      const k = "w-" + UI.week, r = S.reviews[k] || {};
+      const steps = [["receipts", "Receipts recorded"], ["sweeps", "Every receipt swept"], ["pipeline", "Next 30 days checked"], ["outreach", "Five outreach notes"], ["rested", "Rest day kept"]];
+      const energy = [1, 2, 3, 4, 5].map(n => `<button class="chip" aria-pressed="${r.energy === n}" data-act="wenergy" data-n="${n}">${n}</button>`).join("");
+      const past = Object.keys(S.reviews).filter(x => x.startsWith("w-") && S.reviews[x].done).sort().reverse();
+      const low = past.length >= 2 && past.slice(0, 2).every(x => (S.reviews[x].energy || 5) <= 2);
+      return `${pageHead(["Sunday", "Debrief"], "ember", r.done ? `${vpill(1, 1)}Done` : "", `<div class="row" style="gap:6px"><button class="pbtn sm" data-act="week" data-n="-7" aria-label="Previous week">${I.left}</button><span class="small" style="color:#fff">${esc(fmtShortDay(UI.week))}</span><button class="pbtn sm" data-act="week" data-n="7" aria-label="Next week">${I.right}</button></div>`)}
+        ${low ? `<div class="chips"><span class="chip"><i class="dot bad"></i>Low energy 2 weeks: cut a venture, not sleep</span></div>` : ""}
+        <section class="panel"><div>${steps.map(([id, l]) => `<button class="ck" role="checkbox" aria-checked="${r[id] ? "true" : "false"}" data-act="wcheck" data-id="${id}"><span class="tick" aria-checked="${r[id] ? "true" : "false"}">${I.check}</span><span>${esc(l)}</span></button>`).join("")}</div></section>
+        <section class="panel">
+          <label class="field"><span>Money in the next 30 days</span><div class="money"><input id="w-next30" inputmode="decimal" data-rev="next30" value="${esc(r.next30 || "")}" placeholder="0"></div></label>
+          <label class="field"><span>Pipeline</span><textarea id="w-pipeline" rows="2" data-rev="pipeline">${esc(r.pipeline || "")}</textarea></label>
+          <label class="field"><span>One money action</span><input id="w-action" data-rev="action" value="${esc(r.action || "")}"></label>
+          <div class="field"><span>Energy</span><div class="chips energy">${energy}</div></div>
+        </section>
+        <button class="btn ${r.done ? "ghost" : "primary"} block" data-act="wdone">${r.done ? "Reopen" : "Complete · +60 XP"}</button>`;
+    }
+    case "moneydate": {
+      const k = "m-" + UI.month, r = S.reviews[k] || {};
+      const f = (id, label, rows, ph = "") => `<label class="field"><span>${label}</span><textarea id="m-${id}" rows="${rows}" data-rev="${id}" placeholder="${ph}">${esc(r[id] || "")}</textarea></label>`;
+      const ck = (id, l) => `<button class="ck" role="checkbox" aria-checked="${r[id] ? "true" : "false"}" data-act="mcheck" data-id="${id}"><span class="tick" aria-checked="${r[id] ? "true" : "false"}">${I.check}</span><span>${esc(l)}</span></button>`;
+      return `${pageHead(["Money", "Date"], "violet", r.done ? `${vpill(1, 1)}Done` : "", `<div class="row" style="gap:6px"><button class="pbtn sm" data-act="month" data-n="-1" aria-label="Previous month">${I.left}</button><span class="small" style="color:#fff">${esc(fmtMonth(UI.month))}</span><button class="pbtn sm" data-act="month" data-n="1" aria-label="Next month">${I.right}</button></div>`)}
+        <section class="panel">${f("wins", "3 wins", 3, "1.\n2.\n3.")}${f("struggle", "1 struggle", 1)}${f("lesson", "1 lesson", 1)}${f("next", "Next step", 1)}${f("scripture", "One Scripture", 1)}</section>
+        <section class="panel"><div>${ck("date", "Money date held")}${ck("wife", "Your wife joined the last 20 min")}${ck("dash", "Balances updated")}</div></section>
+        <button class="btn ${r.done ? "ghost" : "primary"} block" data-act="mdone">${r.done ? "Reopen" : "Complete · +120 XP"}</button>`;
+    }
+    case "income": {
+      const p = phaseFor(t), byMonth = incomeByMonth(), thisMonth = byMonth[ym] || 0, a3 = avg3(ym);
+      const months = []; for (let i = 5; i >= 0; i--) months.push(addMonths(ym, -i));
+      const maxV = Math.max(1, ...months.map(m => byMonth[m] || 0), p.income[1]);
+      const bars = months.map(m => `<div class="b ${m === ym ? "now" : ""}"><span>${byMonth[m] ? kmoney(byMonth[m]) : ""}</span><i style="height:${((byMonth[m] || 0) / maxV * 78).toFixed(1)}%"></i><span>${MONTHS[+m.slice(5) - 1]}</span></div>`).join("");
+      return `${pageHead(["Income"], "ice", kmoney(thisMonth), `<span class="pill" style="color:#fff;border-color:rgba(255,255,255,.5)">${esc(fmtMonth(ym))}</span>`)}
+        <section class="panel"><div class="bars">${bars}</div></section>
+        <div class="stats" style="margin:0"><div class="stat"><b>${kmoney(a3)}</b><span>3-month avg</span></div><div class="stat"><b>${kmoney(p.income[0])}</b><span>target low</span></div><div class="stat"><b>${kmoney(p.income[1])}</b><span>target high</span></div></div>`;
+    }
+    case "balances": {
+      const snap = latestSnap() || {};
+      return `${pageHead(["Balances"], "jade", snap.date ? esc(fmtShortDay(snap.date)) : "—")}
+        <section class="panel"><div class="grid2">
+          <label class="field"><span>Emergency</span><div class="money"><input id="b-emergency" inputmode="decimal" value="${esc(snap.emergency ?? "")}" placeholder="0"></div></label>
+          <label class="field"><span>Debt left</span><div class="money"><input id="b-debt" inputmode="decimal" value="${esc(snap.debt ?? "")}" placeholder="0"></div></label>
+          <label class="field"><span>Hub</span><div class="money"><input id="b-hub" inputmode="decimal" value="${esc(snap.hub ?? "")}" placeholder="0"></div></label>
+          <label class="field"><span>Invested</span><div class="money"><input id="b-invest" inputmode="decimal" value="${esc(snap.invest ?? "")}" placeholder="0"></div></label>
+          <label class="field"><span>Net worth</span><div class="money"><input id="b-net" inputmode="text" value="${esc(snap.net ?? "")}" placeholder="-25000"></div></label>
+        </div></section>
+        <button class="btn primary block" data-act="snap">Save · +15 XP</button>`;
+    }
+    case "streams":
+      return `${pageHead(["Streams"], "ember", String(streams().length))}
+        <section class="panel">
+          ${streams().length ? `<div>${streams().map(st => {
+            const rs = S.state.receipts.filter(r => r.streamId === st.id), tot = rs.reduce((a, r) => a + num(r.amount), 0);
+            return `<div class="list-row" style="grid-template-columns:1fr auto auto auto"><span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(st.name)}</span><button class="chip" style="min-height:28px;padding:0 10px;font-size:11px" aria-pressed="${!!st.recurring}" data-act="streamrec" data-id="${esc(st.id)}">${st.recurring ? "Recurring" : "One-off"}</button><span class="mono">${kmoney(tot)}</span><button class="x" data-act="delstream" data-id="${esc(st.id)}" aria-label="Delete stream ${esc(st.name)}">✕</button></div>`;
+          }).join("")}</div>` : `<p class="pempty">None yet</p>`}
+          <div class="row"><input id="newstream" placeholder="New stream" maxlength="40" style="flex:1"><button class="btn sm" data-act="addstream">${I.plus} Add</button></div>
+        </section>`;
+    case "receipts": {
+      const recent = S.state.receipts.slice().sort((a, b) => b.date.localeCompare(a.date)).slice(0, 60);
+      return `${pageHead(["Receipts"], "steel", String(S.state.receipts.length))}
+        <button class="btn primary block" data-act="receipt">${I.plus} Log a receipt</button>
+        <section class="panel">${recent.length ? recent.map(r => `<div class="list-row"><span style="min-width:0"><span style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc([r.client, streamName(r)].filter(Boolean).join(" · ") || "Receipt")}</span><span class="dim small mono">${esc(fmtShortDay(r.date))}</span></span><span class="mono">${money(num(r.amount))}</span><button class="x" data-act="delreceipt" data-id="${esc(r.id)}" aria-label="Delete receipt">✕</button></div>`).join("") : `<p class="pempty">None yet</p>`}</section>`;
+    }
+    case "gates": {
+      const g = gates(), e = E(), gn = [g.g1, g.g2, g.g3].filter(Boolean).length;
+      return `${pageHead(["Gates"], "sunset", `${vpill(gn, 3)}${gn}/3`)}
+        <section class="panel">
+          <div class="gate"><span class="g">G1</span><p>Emergency ≥ 1 month${e ? ` (${money(e)})` : ""}</p><span class="pill ${g.g1 ? "done" : ""}">${g.g1 ? "green" : "auto"}</span></div>
+          <div class="gate"><span class="g">G2</span><p>Debt above ~8% cleared or funded</p><button class="chip" aria-pressed="${g.g2}" data-act="gate" data-g="g2">${g.g2 ? "green" : "red"}</button></div>
+          <div class="gate"><span class="g">G3</span><p>3 months income covers it all</p><button class="chip" aria-pressed="${g.g3}" data-act="gate" data-g="g3">${g.g3 ? "green" : "red"}</button></div>
+        </section>
+        <p class="small dim" style="padding:0 4px">All green before any real money. Earliest Nov 2027.</p>`;
+    }
+    case "numbers":
+      return `${pageHead(["Your", "Numbers"], "rose")}
+        <section class="panel">
+          <label class="field"><span>Monthly essentials (E)</span><div class="money"><input id="s-essentials" inputmode="decimal" data-set="essentials" value="${esc(S.state.settings.essentials || "")}" placeholder="From “My Numbers”"></div></label>
+          <label class="field"><span>Starting total debt</span><div class="money"><input id="s-startDebt" inputmode="decimal" data-set="startDebt" value="${esc(S.state.settings.startDebt || "")}" placeholder="From the debt inventory"></div></label>
+          <label class="field"><span>Fixed monthly salary</span><div class="money"><input id="s-salary" inputmode="decimal" data-set="salary" value="${esc(S.state.settings.salary || "")}" placeholder="Your lowest realistic month"></div></label>
+          <label class="field"><span>Accountability partner</span><input id="s-partner" data-set="partner" value="${esc(S.state.settings.partner || "")}" placeholder="Name"></label>
+        </section>
+        <section class="panel"><div class="row wrap" style="gap:8px"><button class="btn sm ghost" data-act="export">Save a backup</button><label class="btn sm ghost" for="importfile" style="cursor:pointer">Restore backup</label><input id="importfile" type="file" accept="application/json,.json" hidden></div>
+          <p class="small dim">${S.backend.kind === "db" ? "Saved privately to your account." : "Saved on this device only."} Education and structure, not licensed advice.</p></section>`;
+  }
+  UI.page = null;
+  return renderToday();
 }
 
 /* ============================================================
@@ -1841,6 +1930,7 @@ function journalSheet(d) {
   const f = (k, l, rows) => `<label class="field"><span>${l}</span><textarea data-jk="${k}" rows="${rows}">${esc(x[k] || "")}</textarea></label>`;
   openSheet(`<div class="stack">
     ${sheetHead(`Testimony journal · ${esc(fmtDay(d))}`, d === todayISO() ? "Today's entry" : esc(fmtDay(d)), hasJournal(x) ? "" : `<span class="pill xp">+20</span>`)}
+    <div class="brief"><b style="color:var(--ink);font-weight:500">${esc(verseFor(d)[0])}:</b> ${esc(verseFor(d)[3])}</div>
     ${f("money", "What happened with money", 3)}${f("felt", "How I felt", 2)}${f("learned", "What I learned", 2)}${f("thankful", "Thankful for", 2)}
     ${d !== todayISO() ? `<div class="grid2"><label class="field"><span>Spent the day before</span><div class="money"><input data-jk="spend" inputmode="decimal" value="${esc(x.spend || "")}" placeholder="0"></div></label><label class="field"><span>Gratitude line</span><input data-jk="gratitude" value="${esc(x.gratitude || "")}"></label></div>` : ""}
     <button class="btn primary" id="j-save">Save entry</button>
@@ -1942,7 +2032,7 @@ function trackSheet(id) {
       const k = a.cta[0];
       if (k === "receipt") receiptSheet();
       else if (k === "today") setTab("today");
-      else { setTab("money"); setTimeout(() => { const el = document.getElementById(k === "streams" ? "streams-mod" : "balances-mod"); el && el.scrollIntoView({ behavior: "smooth", block: "center" }); }, 60); }
+      else openPage(k === "streams" ? "streams" : "balances");
     };
   });
 }
@@ -1968,8 +2058,15 @@ function stoneSheet(n) {
 /* ============================================================
    EVENTS
    ============================================================ */
+function openPage(k, id = "") {
+  if (k === "debrief") UI.jTab = "week";
+  if (k === "moneydate") { UI.jTab = "month"; if (!UI.page || UI.page.k !== "moneydate") UI.month = monthOf(todayISO()) < "2026-12" ? "2026-11" : addMonths(monthOf(todayISO()), parse(todayISO()).getDate() <= 7 ? -1 : 0); }
+  UI.page = { k, id }; UI.enter = "next"; render(); window.scrollTo({ top: 0 });
+}
+function closePage() { UI.page = null; UI.enter = "prev"; render(); window.scrollTo({ top: 0 }); }
 function setTab(tab, enter) {
   UI.enter = enter || (VALID_TABS.indexOf(tab) > VALID_TABS.indexOf(UI.tab) ? "next" : VALID_TABS.indexOf(tab) < VALID_TABS.indexOf(UI.tab) ? "prev" : null);
+  UI.page = null;
   UI.tab = tab;
   try { localStorage.setItem("mazarus:ui:tab", tab); } catch (e) {}
   render(); window.scrollTo({ top: 0 });
@@ -1992,6 +2089,7 @@ document.getElementById("tabs").addEventListener("click", ev => { const b = ev.t
     if (!track) return; track = false;
     const tch = ev.changedTouches[0], dx = tch.clientX - sx, dy = tch.clientY - sy;
     if (Date.now() - st > 700 || Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.6) return;
+    if (UI.page) { if (dx > 0) closePage(); return; }
     const i = VALID_TABS.indexOf(UI.tab), j = i + (dx < 0 ? 1 : -1);
     if (j < 0 || j >= VALID_TABS.length) return;
     setTab(VALID_TABS[j], dx < 0 ? "next" : "prev");
@@ -2002,7 +2100,7 @@ document.getElementById("tabs").addEventListener("click", ev => { const b = ev.t
   let seen = false; try { seen = !!localStorage.getItem("mazarus:ui:swiped"); } catch (e) { seen = true; }
   if (!seen && matchMedia("(pointer: coarse)").matches) setTimeout(() => {
     const h = document.createElement("div"); h.className = "swipe-hint"; h.setAttribute("role", "status");
-    h.innerHTML = "<i></i>Swipe left or right to switch tabs";
+    h.innerHTML = "<i></i>Swipe to switch tabs";
     document.body.appendChild(h); setTimeout(() => h.remove(), 3800);
     try { localStorage.setItem("mazarus:ui:swiped", "1"); } catch (e) {}
   }, 1500);
@@ -2030,9 +2128,10 @@ document.addEventListener("click", async ev => {
     }
     case "energy": { const day = ensureDay(t), n = +el.dataset.n; day.energy = day.energy === n ? 0 : n; saveDay(t); render(); award(before, "Energy logged"); break; }
     case "rest": { const day = ensureDay(t); day.rest = !day.rest; saveDay(t); render(); if (day.rest) award(before, "Rest day kept"); else resyncLevel(); break; }
-    case "goweek": UI.jTab = "week"; UI.week = weekKey(t); setTab("journal"); break;
-    case "gomonth": UI.jTab = "month"; UI.month = el.dataset.m; setTab("journal"); break;
-    case "gomap": UI.mapPhase = +el.dataset.p; setTab("map"); break;
+    case "goweek": UI.week = weekKey(t); openPage("debrief"); break;
+    case "gomonth": UI.jTab = "month"; UI.month = el.dataset.m; UI.page = { k: "moneydate" }; UI.enter = "next"; render(); break;
+    case "page": openPage(el.dataset.k, el.dataset.id); break;
+    case "back": closePage(); break;
     case "phase": UI.mapPhase = +el.dataset.n; render(); break;
     case "jtab": UI.jTab = el.dataset.k; render(); break;
     case "week": UI.week = addDays(UI.week, +el.dataset.n); render(); break;
@@ -2058,7 +2157,6 @@ document.addEventListener("click", async ev => {
     }
     case "streamrec": { const st = streams().find(x => x.id === el.dataset.id); if (st) { st.recurring = !st.recurring; saveState(0); render(); } break; }
     case "track": trackSheet(el.dataset.id); break;
-    case "gotrack": setTab("money"); setTimeout(() => { const o = document.getElementById("overview"); o && o.scrollIntoView({ behavior: "smooth", block: "start" }); }, 50); break;
     case "addstream": {
       const inp = document.getElementById("newstream");
       const st = addStream(inp.value);
@@ -2132,7 +2230,7 @@ document.addEventListener("change", ev => {
   };
   rd.readAsText(f);
 });
-document.addEventListener("keydown", ev => { if (ev.key === "Escape") closeSheet(); if (ev.key === "Enter" && ev.target.id === "newstream") { ev.preventDefault(); document.querySelector('[data-act="addstream"]').click(); } });
+document.addEventListener("keydown", ev => { if (ev.key === "Escape") { if (document.getElementById("sheet")) closeSheet(); else if (UI.page) closePage(); } if (ev.key === "Enter" && ev.target.id === "newstream") { ev.preventDefault(); document.querySelector('[data-act="addstream"]').click(); } });
 let lastToday = todayISO();
 setInterval(() => { const t = todayISO(); if (t !== lastToday) { lastToday = t; softRender(); } }, 60000);
 
