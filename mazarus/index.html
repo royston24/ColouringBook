@@ -2269,6 +2269,10 @@ document.addEventListener("click", async ev => {
       let saved = false;
       try { const dl = window.claude && await window.claude.use("downloads"); if (dl) { await dl.save({ filename: `mazarus-backup-${t}.json`, data }); saved = true; toast("Backup saved"); } }
       catch (e) { if (e && e.code === "declined") return; }
+      if (!saved && !window.claude) {
+        // Installed app / plain browser: a normal file download works here
+        try { const u = URL.createObjectURL(new Blob([data], { type: "application/json" })); const a = document.createElement("a"); a.href = u; a.download = `mazarus-backup-${t}.json`; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 4000); saved = true; toast("Backup downloaded"); } catch (e) {}
+      }
       if (!saved) { try { await navigator.clipboard.writeText(data); toast("Backup copied to clipboard"); } catch (e) { toast("Backup could not be saved here"); } }
       break;
     }
