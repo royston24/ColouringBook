@@ -438,6 +438,18 @@ ol.plain { margin: 0; padding-left: 18px; display: flex; flex-direction: column;
 .hcells button + button { border-left: 1px solid rgba(255,255,255,.38); }
 .hcells svg { width: 16px; height: 16px; }
 .chip .dot { width: 7px; height: 7px; }
+.lvcard { display: flex; flex-direction: column; gap: 14px; width: 100%; text-align: left; padding: 18px; border-radius: 26px; border: 1px solid var(--edge); background: radial-gradient(90% 120% at 0% 0%, rgba(169,150,255,.14), transparent 60%), rgba(150,175,255,.045); }
+.lvcard:active { transform: scale(.99); }
+.lv-top { display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: center; }
+.lv-n { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 72px; height: 72px; border-radius: 22px; background: var(--grad); color: #0b1020; }
+.lv-n small { font-size: 9.5px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; opacity: .75; }
+.lv-n b { font-size: 34px; font-weight: 800; line-height: .95; letter-spacing: -.03em; }
+.lv-meta { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.lv-rank { font-size: 20px; font-weight: 700; letter-spacing: -.02em; }
+.lv-bar { height: 8px; border-radius: 4px; background: rgba(170,195,255,.12); overflow: hidden; }
+.lv-bar i { display: block; height: 100%; border-radius: 4px; background: var(--grad); }
+.lv-chart { width: 100%; height: 64px; display: block; }
+.lv-foot { display: flex; justify-content: space-between; font-size: 10.5px; color: var(--ink-3); margin-top: -6px; }
 .qa { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .qbtn { display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 10px 14px 10px 10px; border-radius: 22px; border: 1px solid var(--edge); background: rgba(150,175,255,.06); font-size: 15px; font-weight: 600; letter-spacing: -.01em; text-align: left; transition: transform .15s, border-color .2s; }
 .qbtn:active { transform: scale(.97); }
@@ -1010,20 +1022,20 @@ function burst() { const f = document.createElement("div"); f.className = "fx"; 
 const dayLogSteps = x => { x = x || {}; return [!!String(x.spend ?? "").trim(), !!String(x.gratitude ?? "").trim(), !!x.energy]; };
 const hasJournal = x => !!(x && (x.money || x.felt || x.learned || x.thankful));
 function dayLogged(d) { const x = S.days[d]; return !!x && (!!x.rest || dayLogSteps(x).some(Boolean) || hasJournal(x)); }
-function computeXP() {
-  let xp = 0;
-  Object.keys(S.state.checks).forEach(id => { const m = MISSIONS[id]; if (m) xp += m.xp; });
-  Object.values(S.days).forEach(x => {
-    xp += x.rest ? 30 : dayLogSteps(x).filter(Boolean).length * 10;
-    xp += (x.focus || []).filter(f => f && f.done && f.t).length * 10;
-    if (hasJournal(x)) xp += 20;
+// XP earned per calendar day; the total is just the sum
+function xpByDay() {
+  const out = {}, add = (d, n) => { d = d || todayISO(); out[d] = (out[d] || 0) + n; };
+  Object.entries(S.state.checks).forEach(([id, d]) => { const m = MISSIONS[id]; if (m) add(d, m.xp); });
+  Object.entries(S.days).forEach(([d, x]) => {
+    add(d, (x.rest ? 30 : dayLogSteps(x).filter(Boolean).length * 10) + (x.focus || []).filter(f => f && f.done && f.t).length * 10 + (hasJournal(x) ? 20 : 0));
   });
-  Object.entries(S.reviews).forEach(([k, r]) => { if (r.done) xp += k.startsWith("w-") ? 60 : 120; });
-  xp += S.state.receipts.length * 25;
-  xp += Object.keys(S.state.stones).length * 100;
-  xp += new Set(S.state.snaps.map(s => s.date)).size * 15;
-  return xp;
+  Object.entries(S.reviews).forEach(([k, r]) => { if (r.done) add(k.startsWith("w-") ? k.slice(2) : endOf(k.slice(2)), k.startsWith("w-") ? 60 : 120); });
+  S.state.receipts.forEach(r => add(r.date, 25));
+  Object.values(S.state.stones).forEach(st => add(st && st.date, 100));
+  [...new Set(S.state.snaps.map(s => s.date))].forEach(d => add(d, 15));
+  return out;
 }
+const computeXP = () => Object.values(xpByDay()).reduce((a, n) => a + n, 0);
 const lvlXP = L => 75 * L * (L - 1); // total XP needed to reach level L
 function levelInfo(xp) {
   let L = 1; while (lvlXP(L + 1) <= xp) L++;
@@ -1372,6 +1384,31 @@ function dots14() {
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 const MONTHS_LONG = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
+/* ---------- Level progress card ---------- */
+function levelCard() {
+  const t = todayISO(), L = levelInfo(computeXP()), by = xpByDay();
+  const days = []; for (let i = 13; i >= 0; i--) days.push(addDays(t, -i));
+  const vals = days.map(d => by[d] || 0), max = Math.max(60, ...vals), sum = vals.reduce((a, n) => a + n, 0);
+  const next = RANKS.find(([l]) => l > L.level);
+  const W = 300, H = 64, bw = W / 14, gap = 5;
+  const bars = days.map((d, i) => {
+    const h = vals[i] ? Math.max(6, vals[i] / max * (H - 6)) : 3;
+    return `<rect x="${(i * bw + gap / 2).toFixed(1)}" y="${(H - h).toFixed(1)}" width="${(bw - gap).toFixed(1)}" height="${h.toFixed(1)}" rx="3" fill="${vals[i] ? (d === t ? "url(#lvg)" : "rgba(169,150,255,.55)") : "rgba(170,195,255,.14)"}"><title>${esc(fmtShortDay(d))}: ${vals[i]} XP</title></rect>`;
+  }).join("");
+  return `<button class="lvcard" data-act="page" data-k="pilot" aria-label="Level ${L.level}, ${esc(L.rank)}. Open your profile">
+    <div class="lv-top">
+      <div class="lv-n"><small>Level</small><b>${L.level}</b></div>
+      <div class="lv-meta">
+        <div class="row between"><span class="lv-rank">${esc(L.rank)}</span><span class="mono small dim">${L.into}/${L.need} XP</span></div>
+        <div class="lv-bar"><i style="width:${(L.into / L.need * 100).toFixed(1)}%"></i></div>
+        <span class="small dim">${(L.need - L.into).toLocaleString()} XP to level ${L.level + 1}${next ? ` · ${esc(next[1])} at ${next[0]}` : ""}</span>
+      </div>
+    </div>
+    <svg class="lv-chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="lvg" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#8be9ff"/><stop offset="1" stop-color="#ff8fc7"/></linearGradient></defs>${bars}</svg>
+    <div class="lv-foot"><span>${esc(fmtShortDay(days[0]))}</span><span class="mono">+${sum} XP · 14 days</span><span>Today</span></div>
+  </button>`;
+}
+
 /* ---------- TODAY ---------- */
 function renderToday() {
   const t = todayISO(), dt = parse(t), day = S.days[t] || {}, steps = dayLogSteps(day);
@@ -1399,6 +1436,7 @@ function renderToday() {
       <span class="hv-f"><span>${esc(vRef)} · NIV</span><span class="hv-go">${I.arrow}</span></span>
     </a>
   </section>
+  ${levelCard()}
   <div class="qa">
     <button class="qbtn" data-act="receipt"><span class="qi" style="--g:${G.jade}">${I.coin}</span>Log money</button>
     <button class="qbtn" data-act="journal" data-d="${t}"><span class="qi" style="--g:${G.rose}">${I.pen}</span>Journal</button>
