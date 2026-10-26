@@ -1,0 +1,680 @@
+/* ColouringAI: bright but calm. A warm paper background, one accent per element,
+   soft shadows, and slow, gentle motion that switches off for reduced-motion users. */
+
+:root {
+  --paper: #fff8ec;
+  --ink: #2b2d42;
+  --ink-soft: #5b5e78;
+  --coral: #ff6b5b;
+  --sun: #ffc845;
+  --sky: #3bb4e5;
+  --mint: #4cc9a0;
+  --grape: #8e6cef;
+  --card: #ffffff;
+  --radius: 26px;
+  --shadow: 0 6px 0 rgba(43, 45, 66, 0.12);
+  --font-head: "Fredoka", "Nunito", system-ui, sans-serif;
+  --font-body: "Nunito", system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-weight: 700;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+button:focus-visible {
+  outline: 4px solid var(--grape);
+  outline-offset: 3px;
+}
+
+.app {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+/* Soft background shapes: decoration only, low contrast so they don't distract. */
+.blobs {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.35;
+  filter: blur(2px);
+}
+.blob--a {
+  width: 340px;
+  height: 340px;
+  background: #ffe3a3;
+  top: -120px;
+  left: -100px;
+}
+.blob--b {
+  width: 280px;
+  height: 280px;
+  background: #c9ecfa;
+  bottom: -90px;
+  right: -60px;
+}
+.blob--c {
+  width: 160px;
+  height: 160px;
+  background: #ffd3cc;
+  top: 40%;
+  right: 8%;
+}
+
+/* ---------- Top bar ---------- */
+.topbar {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 22px;
+}
+.logo {
+  margin: 0;
+  font-family: var(--font-head);
+  font-size: clamp(28px, 4vw, 38px);
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+.logo__c1 {
+  color: var(--ink);
+}
+.logo__ai {
+  margin-left: 4px;
+  padding: 0 10px;
+  border-radius: 14px;
+  background: var(--coral);
+  color: #fff;
+}
+.topbar__actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.icon-btn {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 3px solid var(--ink);
+  background: var(--card);
+  font-size: 22px;
+  box-shadow: var(--shadow);
+}
+.text-btn {
+  border: none;
+  background: none;
+  color: var(--ink-soft);
+  font-size: 14px;
+  text-decoration: underline;
+  padding: 8px;
+}
+
+/* ---------- Main stage ---------- */
+.stage {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  display: flex;
+  gap: 32px;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 22px 24px;
+  flex-wrap: wrap;
+}
+.talk-zone {
+  flex: 1 1 380px;
+  max-width: 560px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+}
+.pip-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+}
+.speech-bubble {
+  position: relative;
+  flex: 1;
+  margin: 0;
+  padding: 18px 22px;
+  background: var(--card);
+  border: 3px solid var(--ink);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  font-size: clamp(18px, 2.2vw, 21px);
+  line-height: 1.35;
+}
+.speech-bubble::before {
+  content: "";
+  position: absolute;
+  left: -14px;
+  top: 50%;
+  width: 22px;
+  height: 22px;
+  background: var(--card);
+  border-left: 3px solid var(--ink);
+  border-bottom: 3px solid var(--ink);
+  transform: translateY(-50%) rotate(45deg);
+}
+
+/* Pip: one slow, gentle bob; the bulb glows while thinking. */
+.pip {
+  flex-shrink: 0;
+  animation: bob 4s ease-in-out infinite;
+}
+.pip--thinking .pip__bulb {
+  animation: glow 1.4s ease-in-out infinite;
+}
+.pip__waves {
+  animation: fade 1.2s ease-in-out infinite;
+}
+@keyframes bob {
+  50% {
+    transform: translateY(-6px);
+  }
+}
+@keyframes glow {
+  50% {
+    fill: #fff3c4;
+  }
+}
+@keyframes fade {
+  50% {
+    opacity: 0.3;
+  }
+}
+
+/* ---------- Words as bubbles ---------- */
+.word-stage {
+  min-height: 78px;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-content: center;
+  gap: 10px;
+}
+.word-bubble {
+  display: inline-block;
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: 3px solid var(--ink);
+  font-family: var(--font-head);
+  font-size: clamp(22px, 3vw, 28px);
+  font-weight: 600;
+  box-shadow: var(--shadow);
+  animation: pop 0.35s ease-out both;
+}
+.word-bubble--coral {
+  background: #ffd9d4;
+}
+.word-bubble--sun {
+  background: #ffeeb5;
+}
+.word-bubble--sky {
+  background: #cdeefb;
+}
+.word-bubble--mint {
+  background: #ccf2e3;
+}
+.word-bubble--grape {
+  background: #e4dbfd;
+}
+.word-bubble--oops {
+  background: #f1f1f4;
+  border-style: dashed;
+}
+@keyframes pop {
+  from {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+.listening-dots {
+  display: flex;
+  gap: 10px;
+}
+.listening-dots span {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--sky);
+  animation: fade 1.2s ease-in-out infinite;
+}
+.listening-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.listening-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+/* ---------- The big microphone button ---------- */
+.mic-btn {
+  position: relative;
+  width: 176px;
+  height: 176px;
+  border-radius: 50%;
+  border: 5px solid var(--ink);
+  background: var(--sky);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  box-shadow: 0 8px 0 rgba(43, 45, 66, 0.2);
+  transition: transform 0.15s ease, background 0.2s ease;
+}
+.mic-btn:active:not(:disabled) {
+  transform: translateY(4px);
+  box-shadow: 0 4px 0 rgba(43, 45, 66, 0.2);
+}
+.mic-btn:disabled {
+  background: #b9bccb;
+  cursor: default;
+}
+.mic-btn--on {
+  background: var(--coral);
+}
+.mic-btn__icon {
+  font-size: 54px;
+  line-height: 1;
+}
+.mic-btn__label {
+  font-family: var(--font-head);
+  font-size: 20px;
+  font-weight: 600;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.15);
+}
+.mic-btn__ring {
+  position: absolute;
+  inset: -14px;
+  border-radius: 50%;
+  border: 4px solid var(--coral);
+  opacity: 0;
+}
+.mic-btn--on .mic-btn__ring {
+  animation: ring 1.8s ease-out infinite;
+}
+@keyframes ring {
+  from {
+    transform: scale(0.92);
+    opacity: 0.7;
+  }
+  to {
+    transform: scale(1.15);
+    opacity: 0;
+  }
+}
+
+/* ---------- Ideas, tips, notices ---------- */
+.suggestions {
+  text-align: center;
+}
+.suggestions__hint {
+  margin: 0 0 10px;
+  color: var(--ink-soft);
+}
+.suggestions__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+}
+.idea-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 128px;
+  padding: 14px 10px;
+  border-radius: 22px;
+  border: 3px solid var(--ink);
+  background: var(--card);
+  box-shadow: var(--shadow);
+  animation: pop 0.35s ease-out both;
+}
+.idea-card:active {
+  transform: translateY(3px);
+}
+.idea-card__emoji {
+  font-size: 40px;
+}
+.idea-card__label {
+  font-size: 15px;
+}
+.tip-card {
+  width: 100%;
+  padding: 16px 20px;
+  border-radius: var(--radius);
+  background: #f2edff;
+  border: 3px solid var(--grape);
+  text-align: center;
+}
+.tip-card__badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--grape);
+  color: #fff;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.tip-card p {
+  margin: 10px 0 0;
+  font-size: 18px;
+  animation: fadeIn 0.6s ease both;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+}
+.notice {
+  padding: 16px 20px;
+  border-radius: var(--radius);
+  background: #fff1d6;
+  border: 3px solid var(--sun);
+  text-align: center;
+}
+
+/* ---------- Colouring page ---------- */
+.art-zone {
+  flex: 1 1 380px;
+  max-width: 520px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  animation: fadeIn 0.5s ease both;
+}
+.colouring {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.paper {
+  background: #fff;
+  border: 4px solid var(--ink);
+  border-radius: var(--radius);
+  box-shadow: 8px 8px 0 var(--ink);
+  padding: 14px;
+}
+.line-art {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.art-area {
+  cursor: pointer;
+  transition: fill 0.25s ease;
+}
+.line-art--animate path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: draw 0.9s ease-out forwards;
+  animation-delay: var(--d);
+}
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.crayon-box {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+.crayon {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 3px solid var(--ink);
+  background: var(--c);
+  transition: transform 0.15s ease;
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+}
+.crayon--active {
+  transform: scale(1.2);
+  box-shadow: 0 0 0 4px var(--paper), 0 0 0 7px var(--ink);
+}
+.soft-btn {
+  padding: 14px 26px;
+  border-radius: 999px;
+  border: 3px solid var(--ink);
+  background: var(--sun);
+  font-family: var(--font-head);
+  font-size: 19px;
+  font-weight: 600;
+  box-shadow: var(--shadow);
+}
+.soft-btn:active {
+  transform: translateY(3px);
+}
+
+/* ---------- The AI steps bar ---------- */
+.steps-bar {
+  position: relative;
+  z-index: 1;
+  padding: 12px 16px 20px;
+  text-align: center;
+}
+.ai-steps {
+  list-style: none;
+  margin: 0 auto;
+  padding: 12px 16px;
+  display: inline-flex;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.85);
+  border: 3px solid var(--ink);
+  border-radius: 999px;
+  box-shadow: var(--shadow);
+}
+.ai-step {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink-soft);
+  font-size: 15px;
+}
+.ai-step__icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+  background: #eef0f5;
+  border: 2px solid transparent;
+  transition: background 0.3s ease;
+}
+.ai-step--active {
+  color: var(--ink);
+}
+.ai-step--active .ai-step__icon {
+  background: var(--sun);
+  border-color: var(--ink);
+  animation: bob 1.6s ease-in-out infinite;
+}
+.ai-step--done .ai-step__icon {
+  background: var(--mint);
+  color: #fff;
+  border-color: var(--ink);
+}
+.ai-step__line {
+  width: 18px;
+  height: 3px;
+  border-radius: 2px;
+  background: #d5d8e2;
+  margin: 0 4px;
+}
+.demo-note {
+  margin: 10px 0 0;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+/* ---------- Grown-ups dialog ---------- */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  background: rgba(43, 45, 66, 0.4);
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+.modal {
+  max-width: 620px;
+  max-height: 88vh;
+  overflow-y: auto;
+  background: var(--card);
+  border: 4px solid var(--ink);
+  border-radius: var(--radius);
+  padding: 24px 28px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+.modal h2 {
+  margin-top: 0;
+  font-family: var(--font-head);
+}
+.modal h3 {
+  margin-bottom: 4px;
+  font-family: var(--font-head);
+  color: var(--grape);
+}
+.modal ul {
+  padding-left: 20px;
+}
+.modal code {
+  background: #f2f2f6;
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+.modal__demo {
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: #fff1d6;
+}
+
+/* ---------- Small screens ---------- */
+@media (max-width: 640px) {
+  .ai-step__label {
+    display: none;
+  }
+  .ai-step--active .ai-step__label {
+    display: inline;
+  }
+  .pip-row {
+    flex-direction: column;
+  }
+  .speech-bubble::before {
+    left: 50%;
+    top: -14px;
+    transform: translateX(-50%) rotate(135deg);
+  }
+  .mic-btn {
+    width: 150px;
+    height: 150px;
+  }
+}
+
+/* ---------- Calm mode for children sensitive to motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .line-art--animate path {
+    animation-delay: 0s !important;
+  }
+}
+
+/* ---------- Printing: only the colouring sheet goes to paper ---------- */
+.print-sheet {
+  display: none;
+}
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 12mm;
+  }
+  html,
+  body {
+    background: #fff;
+  }
+  .app {
+    display: none !important;
+  }
+  .print-sheet {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6mm;
+    font-family: var(--font-head);
+    color: #000;
+  }
+  .print-sheet__title {
+    margin: 0;
+    font-size: 30pt;
+  }
+  .print-sheet__art {
+    width: 175mm;
+    height: 175mm;
+  }
+  .print-sheet__art path {
+    fill: #fff;
+    stroke: #000;
+  }
+  .print-sheet__art .art-line {
+    fill: none;
+  }
+  .print-sheet__footer {
+    width: 175mm;
+    display: flex;
+    justify-content: space-between;
+    font-size: 13pt;
+  }
+}
