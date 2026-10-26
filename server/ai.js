@@ -9,7 +9,9 @@ import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 
-const MODEL = process.env.COLOURINGAI_MODEL || "claude-opus-5-5";
+// Opus reviews for safety (the careful judgement call); Sonnet draws (fast and cheaper).
+const REVIEW_MODEL = process.env.COLOURINGAI_REVIEW_MODEL || "claude-opus-5-5";
+const DRAW_MODEL = process.env.COLOURINGAI_DRAW_MODEL || "claude-sonnet-5-5";
 
 let client = null;
 export function aiAvailable() {
@@ -54,7 +56,7 @@ For not_safe or unclear ideas, set subject and title to empty strings.`;
 export async function reviewPrompt(spokenText, cautionWords = []) {
   const hint = cautionWords.length ? `\nCaution hint: ${cautionWords.join(", ")}` : "";
   const response = await getClient().messages.parse({
-    model: MODEL,
+    model: REVIEW_MODEL,
     max_tokens: 4000,
     output_config: { effort: "low", format: zodOutputFormat(ReviewSchema) },
     system: REVIEW_SYSTEM,
@@ -109,7 +111,7 @@ export function cleanShapes(shapes) {
 
 export async function drawPicture(subject) {
   const response = await getClient().messages.parse({
-    model: MODEL,
+    model: DRAW_MODEL,
     max_tokens: 16000,
     output_config: { effort: "medium", format: zodOutputFormat(DrawingSchema) },
     system: DRAW_SYSTEM,

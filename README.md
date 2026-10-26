@@ -64,7 +64,8 @@ Pages print automatically after each drawing, which normally opens the browser's
 | Variable | Default | Meaning |
 | --- | --- | --- |
 | `ANTHROPIC_API_KEY` | – | Your Claude API key. Leave it empty for practice mode. |
-| `COLOURINGAI_MODEL` | `claude-opus-5-5` | The Claude model used for reviewing and drawing. |
+| `COLOURINGAI_REVIEW_MODEL` | `claude-opus-5-5` | The Claude model that safety-checks each idea. |
+| `COLOURINGAI_DRAW_MODEL` | `claude-sonnet-5-5` | The Claude model that draws the colouring page. |
 | `COLOURINGAI_RATE_LIMIT` | `20` | Pictures per device per 10 minutes. |
 | `PORT` | `8787` | Server port. |
 
