@@ -32,6 +32,17 @@ Safety is layered, so no single layer has to be perfect:
 
 The API key stays on the server and is never sent to the browser.
 
+## Two versions
+
+| | Full app (this project) | claude.ai app |
+| --- | --- | --- |
+| Open it | Run it on your computer or a web host (below) | Open its claude.ai link |
+| Child's idea | Spoken aloud, words appear as bubbles | Tapped from picture tiles (who, doing, where), words appear as bubbles |
+| Drawing | Claude Sonnet, through your API key | Claude Sonnet, through the viewer's own Claude account (no API key) |
+| Printing | Prints automatically | Saves an A4 PDF to print |
+
+The claude.ai version exists because claude.ai pages can't use the microphone or open the print window. Its source is `artifact/template.html`. Rebuild it with `node artifact/build.mjs`, which pulls in the same safety filter and built-in pictures as the full app, then publish `artifact/colouringai.html`.
+
 ## Running it
 
 You need [Node.js](https://nodejs.org) 20 or newer.
